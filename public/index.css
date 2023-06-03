@@ -1,0 +1,150 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Kanit', sans-serif;
+    font-weight: 300;
+}
+
+nav {
+    display: flex;
+    margin-left: 16px;
+    padding-top: 1rem;
+    font-size: 24px;
+}
+
+.bento {
+    width: 48px; 
+    height: 48px;
+    align-self: center;
+    margin-left: 0.5rem;
+    animation-play-state: paused;  
+    animation-name: bounce;
+    animation-duration: 0.3s;
+}
+
+.bento:hover, .bento:focus {
+    animation-play-state: running;
+}
+
+images {
+    display: grid;
+    grid-template-columns: repeat( auto-fit, 256px );
+    margin-inline: auto;
+    margin-block: 2rem;
+    gap: 0.3rem;
+    justify-content: center;
+    justify-items: center;
+    align-content: center;
+    align-items: center;
+}
+
+.img {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-clip: border-box;
+    height: 256px;
+    width: 256px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(16px);
+    animation-name: blur;
+    animation-duration: 0.6s;
+    transform-origin: 0 0;
+}
+  
+.modal-image {
+    margin: auto;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 8px;
+    animation-name: zoom;
+    animation-duration: 0.6s;
+    transform-origin: 0 0;
+}
+
+.modal-content {
+    width: 80%;
+    max-width: 700px;
+}
+
+/* .modal-background {
+    width: 50%;
+
+    filter: blur(16px) brightness(0.5);
+    z-index: -1;
+} */
+
+@keyframes zoom {
+    from {transform: scale(0.1) translate(-50%, -50%);} 
+    to {transform: scale(1) translate(-50%, -50%);}
+  }
+
+@keyframes blur {
+    from {
+        background-color: rgba(0, 0, 0, 0);
+        backdrop-filter: blur(0px);
+    } 
+    to {
+        background-color: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(16px);
+    }
+  }
+
+@keyframes bounce {
+    from {transform: scale(1)} 
+    50% {transform: scale(1.05)}
+    to {transform: scale(1)} 
+  }
+
+.image-nav {
+    position: fixed;
+    display: flex;
+    gap: 1.5rem;
+    top: 32px;
+    right: 16px;
+    font-size: 48px;
+}
+
+span, a {
+    text-decoration: none;
+    cursor: pointer;
+}
+
+@media only screen and (max-width: 700px){
+    .modal-content {
+      width: 100%;
+    }
+    .image-nav {
+        font-size: 64px;
+    }
+  }
+
+@media (prefers-color-scheme: dark) {
+    body.adaptive {
+      background: rgba(0, 0, 0);
+      color: rgb(255, 255, 255);
+    }
+  }
+  
