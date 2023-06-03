@@ -38,14 +38,12 @@ images {
 }
 
 .img {
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
     height: 300px;
     width: 300px;
     border-radius: 8px;
     cursor: pointer;
     transition: scale 0.1s;
+    object-fit: cover;
 }
 
 :is(.img, a, span, .bento):where(:hover, :focus) {
@@ -142,8 +140,12 @@ span, a {
 
 @media (prefers-color-scheme: dark) {
     body.adaptive {
-      background: rgba(0, 0, 0);
-      color: rgb(255, 255, 255);
+      background: #0b132b;
+      color: #fbaccd;
     }
   }
-  
+@media (prefers-color-scheme: light) {
+    body.adaptive {
+      color: #cd1f2d;
+    }
+  }
