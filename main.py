@@ -115,7 +115,13 @@ def prepape_website(images):
             for image in images:
                 if image == 'gitkeep':
                     continue
-                a.img(klass="img", src=f"media/small/{image}", large=f"media/large/{image}", alt=image, loading="lazy")
+                with a.div(klass="img"):
+                    a.img(klass="img clickable", src=f"media/small/{image}", large=f"media/large/{image}", alt=image, loading="lazy")
+                    with a.div(klass="image-overlay", id="image-overlay"):
+                        with a.span(id="copy-overlay", url=f'media/original/{image}'):
+                            a('🔗') 
+                        with a.a('download', id="download-overlay", href=f"media/original/{image}"):
+                            a('💾') 
                     
         a.script(type='text/javascript', src='public/preview.js')
         a.script(type='text/javascript', src='public/tags.js')
