@@ -2,12 +2,34 @@ from PIL import Image
 import os
 from shutil import copy, copytree
 from airium import Airium
+import json
 
+CONFIG = {
+    "INPUT": 'gallery',
+    "OUTPUT": 'web',
+    "LARGE_SIZE": [1000, 1000],
+    "SMALL_SIZE": [500, 500],
+    "OPENGRAPH": {
+        "WEBSITE_TITLE": "Radiquum Photos",
+        "WEBSITE_DESCRIPTION": "Public gallery of https://bento.me/radiquum",
+        "WEBSITE_URL": "https://photos.radiquum.wah.su"
+    }
+}
 
-INPUT = 'gallery'
-OUTPUT = 'web'
-LARGE_SIZE = [1000, 1000]
-SMALL_SIZE = [500, 500]
+config_file = 'config.json'
+
+try:
+    if os.path.isfile('config_test.json'):
+        config_file = 'config_test.json'
+    
+    with open(config_file, encoding='utf-8') as config:
+        CONFIG = json.load(config)
+except FileNotFoundError:
+    with open(config_file, 'w', encoding='utf-8') as config:
+        config.write(json.dumps(CONFIG, indent=3))
+        
+INPUT = CONFIG.get('INPUT')
+OUTPUT = CONFIG.get('OUTPUT')
 
 def prepare_images():
     print('Finding images...')
@@ -32,13 +54,12 @@ def prepare_images():
         copy(f'{INPUT}/{image}', f'{OUTPUT}/media/original/{image}')
 
         with Image.open(f'{INPUT}/{image}') as im:
-            im.thumbnail(LARGE_SIZE, Image.LANCZOS)
+            im.thumbnail(CONFIG.get('LARGE_SIZE'), Image.LANCZOS)
             im.save(f'{OUTPUT}/media/large/{image}')
 
-            im.thumbnail(SMALL_SIZE, Image.LANCZOS)
+            im.thumbnail(CONFIG.get('SMALL_SIZE'), Image.LANCZOS)
             im.save(f'{OUTPUT}/media/small/{image}')
-
-    prepape_website(image_array[2])
+    prepape_website(sorted(image_array[2]))
     return True
 
 def prepape_website(images):
@@ -51,12 +72,12 @@ def prepape_website(images):
     with a.html(lang="en"):
         with a.head():
             a.meta(charset="utf-8")
-            a.meta(property="og:title", content="Radiquum Photos")
+            a.meta(property="og:title", content=CONFIG["OPENGRAPH"].get("WEBSITE_TITLE"))
             a.meta(property="og:type", content="website")
-            a.meta(property="og:description", content="Public gallery of https://bento.me/radiquum")
-            a.meta(property="og:type", content="https://photos.wah.su")
+            a.meta(property="og:description", content=CONFIG["OPENGRAPH"].get("WEBSITE_DESCRIPTION"))
+            a.meta(property="og:url", content=CONFIG["OPENGRAPH"].get("WEBSITE_URL"))
 
-            a.title(_t="Radiquum Photos")
+            a.title(_t=CONFIG["OPENGRAPH"].get("WEBSITE_TITLE"))
             a.link(rel="stylesheet", href="public/index.css")
 
         with a.body(klass="adaptive"):
@@ -66,15 +87,15 @@ def prepape_website(images):
                 with a.p():
                     a('Photos')
                 with a.a(href="https://bento.me/radiquum", klass="bento"):
-                    a.img(src="public/Bento-Logo.svg", klass="bento", alt="", loading="lazy")
+                    a.img(src="public/Bento-Logo.svg", klass="bento", alt="")
                         
         with a.div(klass="modal", id="modal"):
-            a.img(klass="modal-image modal-content", id="modal-image", src="", alt="", loading="lazy")
+            a.img(klass="modal-image modal-content", id="modal-image", src="", alt="")
             a.div(klass="modal-background", id="modal-background")
             with a.div(klass="image-nav", id="image-nav"):
                 with a.span(id="copy"):
                     a('🔗') 
-                with a.a('download', id="download", href="media/original/image"):
+                with a.a('download', id="download", href=""):
                     a('💾') 
                 with a.span('info', id="info"):
                     a('📋') 
@@ -88,9 +109,9 @@ def prepape_website(images):
                     continue
                 a.img(klass="img", src=f"media/small/{image}", large=f"media/large/{image}", alt=image, loading="lazy")
                     
-            a.script(type='text/javascript', src='public/preview.js')
-            a.script(type='text/javascript', src='public/tags.js')
-            a.script(type='text/javascript', src='https://cdn.jsdelivr.net/npm/exif-js')
+        a.script(type='text/javascript', src='public/preview.js')
+        a.script(type='text/javascript', src='public/tags.js')
+        a.script(type='text/javascript', src='https://cdn.jsdelivr.net/npm/exif-js')
                     
 
     html = str(a)
