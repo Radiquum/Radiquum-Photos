@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image, ImageOps
 import os
 from shutil import copy, copytree
 from airium import Airium
@@ -54,11 +54,15 @@ def prepare_images():
         copy(f'{INPUT}/{image}', f'{OUTPUT}/media/original/{image}')
 
         with Image.open(f'{INPUT}/{image}') as im:
+            EXIF = im.getexif()
+            im = ImageOps.exif_transpose(im)
+            
             im.thumbnail(CONFIG.get('LARGE_SIZE'), Image.LANCZOS)
-            im.save(f'{OUTPUT}/media/large/{image}')
+            im.save(f'{OUTPUT}/media/large/{image}', exif=EXIF)
 
             im.thumbnail(CONFIG.get('SMALL_SIZE'), Image.LANCZOS)
-            im.save(f'{OUTPUT}/media/small/{image}')
+            im.save(f'{OUTPUT}/media/small/{image}', optimize=True)
+            
     prepape_website(sorted(image_array[2], reverse=True))
     return True
 
