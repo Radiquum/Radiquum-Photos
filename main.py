@@ -59,7 +59,7 @@ def prepare_images():
 
             im.thumbnail(CONFIG.get('SMALL_SIZE'), Image.LANCZOS)
             im.save(f'{OUTPUT}/media/small/{image}')
-    prepape_website(sorted(image_array[2]))
+    prepape_website(sorted(image_array[2], reverse=True))
     return True
 
 def prepape_website(images):
