@@ -40,6 +40,7 @@ def prepare_images():
     os.makedirs(f'{OUTPUT}/media/original', exist_ok=True)
     os.makedirs(f'{OUTPUT}/media/large', exist_ok=True)
     os.makedirs(f'{OUTPUT}/media/small', exist_ok=True)
+    os.makedirs(f'{OUTPUT}/media/exif', exist_ok=True)
     os.makedirs(f'{OUTPUT}/public', exist_ok=True)
 
     image_array_check = ['something', 'something', []]
@@ -58,10 +59,13 @@ def prepare_images():
             im = ImageOps.exif_transpose(im)
             
             im.thumbnail(CONFIG.get('LARGE_SIZE'), Image.LANCZOS)
-            im.save(f'{OUTPUT}/media/large/{image}', exif=EXIF)
+            im.save(f'{OUTPUT}/media/large/{image}')
 
             im.thumbnail(CONFIG.get('SMALL_SIZE'), Image.LANCZOS)
             im.save(f'{OUTPUT}/media/small/{image}', optimize=True)
+            
+            im.thumbnail([1, 1], Image.LANCZOS)
+            im.save(f'{OUTPUT}/media/exif/{image}', optimize=True, exif=EXIF)
             
     prepape_website(sorted(image_array[2], reverse=True))
     return True
