@@ -1,0 +1,17 @@
+{
+   "INPUT": "gallery",
+   "OUTPUT": "web",
+   "LARGE_SIZE": [
+      1000,
+      1000
+   ],
+   "SMALL_SIZE": [
+      500,
+      500
+   ],
+   "OPENGRAPH": {
+      "WEBSITE_TITLE": "Radiquum Photos",
+      "WEBSITE_DESCRIPTION": "Public gallery of https://bento.me/radiquum",
+      "WEBSITE_URL": "https://photos.radiquum.wah.su"
+   }
+}

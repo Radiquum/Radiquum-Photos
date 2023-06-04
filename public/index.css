@@ -12,6 +12,7 @@ body {
 
 nav {
     display: flex;
+    flex-wrap: wrap;
     margin-left: 16px;
     padding-top: 1rem;
     font-size: 24px;
@@ -30,7 +31,7 @@ images {
     grid-template-columns: repeat( auto-fill, 300px );
     margin-inline: auto;
     margin-block: 2rem;
-    gap: 0.3rem;
+    gap: 0.5rem;
     justify-content: center;
     justify-items: center;
     align-content: center;
@@ -130,7 +131,6 @@ span, a {
 @media only screen and (max-width: 700px){
     images {
         grid-template-columns: repeat( auto-fill, 250px );
-        gap: 0.5rem;
     }
     .img {
         width: 250px;
