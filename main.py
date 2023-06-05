@@ -17,7 +17,8 @@ CONFIG = {
     "OPENGRAPH": {
         "WEBSITE_TITLE": "Radiquum Photos",
         "WEBSITE_DESCRIPTION": "Public gallery of https://bento.me/radiquum",
-        "WEBSITE_URL": "https://photos.radiquum.wah.su"
+        "WEBSITE_URL": "https://photos.radiquum.wah.su",
+        "WEBSITE_IMAGE": None
     }
 }
 
@@ -77,8 +78,24 @@ def prepare_images():
             
             im.thumbnail([1, 1], Image.LANCZOS)
             im.save(f'{OUTPUT}/media/exif/{image}', optimize=True, exif=EXIF)
-            
-    prepare_website(sorted(image_array[2], reverse=True))
+    Image_List = sorted(image_array[2], reverse=True)
+    
+    #generate og:image
+    
+    opengraph_image = Image.open(f'{OUTPUT}/media/large/{Image_List[0]}')
+    opengraph_foreground = Image.open(f"{OUTPUT}/public/favicon/android-chrome-256x256.png")
+    img_w, img_h = opengraph_foreground.size
+    bg_w, bg_h = opengraph_image.size
+    offset = ((bg_w - img_w) // 2, (bg_h - img_h) // 2)
+    opengraph_image.paste(opengraph_foreground, offset, opengraph_foreground)
+    
+    opengraph_image.save(f"{OUTPUT}/public/opengraph.png")
+    opengraph_foreground.close()
+    opengraph_image.close()
+    
+    CONFIG["OPENGRAPH"]["WEBSITE_IMAGE"] = f'{CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/public/opengraph.png'
+    
+    prepare_website(Image_List)
     return True
 
 # Website generation
@@ -92,7 +109,7 @@ def image_add(a, image, orint):
             with a.a('download', id="download-overlay", klass="material-icons", href=f"media/original/{image}", tabindex=-1):
                 a("download")
                             
-def prepare_website(images):
+def prepare_website(images):  # sourcery skip: extract-method
     a = Airium()
     
     print('Creating website...')
@@ -102,12 +119,30 @@ def prepare_website(images):
     with a.html(lang="en"):
         with a.head():
             a.meta(charset="utf-8")
+            a.title(_t=CONFIG["OPENGRAPH"].get("WEBSITE_TITLE"))
+            a.meta(name="description", content=CONFIG["OPENGRAPH"].get("WEBSITE_DESCRIPTION"))
+            
+            a.link(rel="apple-touch-icon", sizes="180x180", href="/public/favicon/apple-touch-icon.png")
+            a.link(rel="icon", type="image/png", sizes="32x32", href="/public/favicon/favicon-32x32.png")
+            a.link(rel="icon", type="image/png", sizes="16x16", href="/public/favicon/favicon-16x16.png")
+            a.link(rel="manifest", href="/public/favicon/site.webmanifest")
+            a.link(rel="mask-icon", href="/public/favicon/safari-pinned-tab.svg", color="#5bbad5")
+            a.link(rel="shortcut icon", href="/public/favicon/favicon.ico")
+            a.meta(name="msapplication-TileColor", content="#da532c")
+            a.meta(name="msapplication-config", content="/public/favicon/browserconfig.xml")
+            a.meta(name="theme-color", content="#ffffff")
+            
             a.meta(property="og:title", content=CONFIG["OPENGRAPH"].get("WEBSITE_TITLE"))
+            a.meta(property="twitter:title", content=CONFIG["OPENGRAPH"].get("WEBSITE_TITLE"))
             a.meta(property="og:type", content="website")
             a.meta(property="og:description", content=CONFIG["OPENGRAPH"].get("WEBSITE_DESCRIPTION"))
+            a.meta(property="twitter:description", content=CONFIG["OPENGRAPH"].get("WEBSITE_DESCRIPTION"))
             a.meta(property="og:url", content=CONFIG["OPENGRAPH"].get("WEBSITE_URL"))
-
-            a.title(_t=CONFIG["OPENGRAPH"].get("WEBSITE_TITLE"))
+            a.meta(property="og:image", content=CONFIG["OPENGRAPH"].get("WEBSITE_IMAGE"))
+            a.meta(property="twitter:image", content=CONFIG["OPENGRAPH"].get("WEBSITE_IMAGE"))
+            a.meta(property="twitter:card", content="summary_large_image")
+            
+            
             a.link(rel="stylesheet", href="public/index.css")
             a.link(rel="stylesheet", href="https://fonts.googleapis.com/icon?family=Material+Icons")
 

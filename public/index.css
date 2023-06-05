@@ -79,7 +79,6 @@ images {
     border-radius: 10px;
     cursor: pointer;
     object-fit: cover;
-    transform-origin: right;
     transition: scale 0.1s, border-radius 0.1s;
     width: 300px;
 }
