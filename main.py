@@ -78,24 +78,8 @@ def prepare_images():
             
             im.thumbnail([1, 1], Image.LANCZOS)
             im.save(f'{OUTPUT}/media/exif/{image}', optimize=True, exif=EXIF)
-    Image_List = sorted(image_array[2], reverse=True)
     
-    #generate og:image
-    
-    opengraph_image = Image.open(f'{OUTPUT}/media/large/{Image_List[0]}')
-    opengraph_foreground = Image.open(f"{OUTPUT}/public/favicon/android-chrome-256x256.png")
-    img_w, img_h = opengraph_foreground.size
-    bg_w, bg_h = opengraph_image.size
-    offset = ((bg_w - img_w) // 2, (bg_h - img_h) // 2)
-    opengraph_image.paste(opengraph_foreground, offset, opengraph_foreground)
-    
-    opengraph_image.save(f"{OUTPUT}/public/opengraph.png")
-    opengraph_foreground.close()
-    opengraph_image.close()
-    
-    CONFIG["OPENGRAPH"]["WEBSITE_IMAGE"] = f'{CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/public/opengraph.png'
-    
-    prepare_website(Image_List)
+    prepare_website(sorted(image_array[2], reverse=True))
     return True
 
 # Website generation
@@ -114,6 +98,21 @@ def prepare_website(images):  # sourcery skip: extract-method
     
     print('Creating website...')
     copytree('./public', f'{OUTPUT}/public', dirs_exist_ok=True)
+    
+    #generate og:image
+    
+    opengraph_image = Image.open(f'{OUTPUT}/media/large/{images[0]}')
+    opengraph_foreground = Image.open(f"{OUTPUT}/public/favicon/android-chrome-256x256.png")
+    img_w, img_h = opengraph_foreground.size
+    bg_w, bg_h = opengraph_image.size
+    offset = ((bg_w - img_w) // 2, (bg_h - img_h) // 2)
+    opengraph_image.paste(opengraph_foreground, offset, opengraph_foreground)
+    
+    opengraph_image.save(f"{OUTPUT}/public/opengraph.png")
+    opengraph_foreground.close()
+    opengraph_image.close()
+    
+    CONFIG["OPENGRAPH"]["WEBSITE_IMAGE"] = f'{CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/public/opengraph.png'
     
     a('<!DOCTYPE html>')
     with a.html(lang="en"):
