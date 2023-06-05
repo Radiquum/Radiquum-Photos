@@ -83,6 +83,15 @@ def prepare_images():
 
 # Website generation
 
+def image_add(a, image, orint):
+    with a.div(klass=f"img {orint}", tabindex=0):
+        a.img(klass="img clickable", src=f"media/small/{image}", alt=image, loading="lazy", tabindex=-1)
+        with a.div(klass="image-overlay {orint}", id="image-overlay"):
+            with a.span(id="copy-overlay", klass="material-icons", url=f'media/original/{image}', tabindex=-1):
+                a('share')
+            with a.a('download', id="download-overlay", klass="material-icons", href=f"media/original/{image}", tabindex=-1):
+                a("download")
+                            
 def prepare_website(images):
     a = Airium()
     
@@ -128,13 +137,14 @@ def prepare_website(images):
             for image in images:
                 if image == 'gitkeep':
                     continue
-                with a.div(klass="img", tabindex=0):
-                    a.img(klass="img clickable", src=f"media/small/{image}", alt=image, loading="lazy", tabindex=-1)
-                    with a.div(klass="image-overlay", id="image-overlay"):
-                        with a.span(id="copy-overlay", klass="material-icons", url=f'media/original/{image}', tabindex=-1):
-                            a('share')
-                        with a.a('download', id="download-overlay", klass="material-icons", href=f"media/original/{image}", tabindex=-1):
-                            a("download")
+                
+                with Image.open(f'{OUTPUT}/media/small/{image}') as im:
+                    if im.width > im.height:
+                        image_add(a, image, 'horizontal')
+                    elif im.width == im.height :
+                        image_add(a, image, 'square')
+                    else:
+                        image_add(a, image, 'vertical')
                     
         a.script(type='text/javascript', src='public/preview.js')
         a.script(type='text/javascript', src='public/tags.js')
