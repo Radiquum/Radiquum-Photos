@@ -1,8 +1,13 @@
+# Imports
+
 from PIL import Image, ImageOps
 import os
 from shutil import copy, copytree
 from airium import Airium
 import json
+
+
+# Default config
 
 CONFIG = {
     "INPUT": 'gallery',
@@ -15,6 +20,9 @@ CONFIG = {
         "WEBSITE_URL": "https://photos.radiquum.wah.su"
     }
 }
+
+
+# Config loading
 
 config_file = 'config.json'
 
@@ -31,27 +39,30 @@ except FileNotFoundError:
 INPUT = CONFIG.get('INPUT')
 OUTPUT = CONFIG.get('OUTPUT')
 
+# Image resizing
+
 def prepare_images():
     print('Finding images...')
     image_array = next(os.walk(INPUT))
     print(f'Found: {len(image_array[2])}')
 
-    print('Creating folders...')
     os.makedirs(f'{OUTPUT}/media/original', exist_ok=True)
     os.makedirs(f'{OUTPUT}/media/large', exist_ok=True)
     os.makedirs(f'{OUTPUT}/media/small', exist_ok=True)
     os.makedirs(f'{OUTPUT}/media/exif', exist_ok=True)
     os.makedirs(f'{OUTPUT}/public', exist_ok=True)
 
+    print('Updating images...')
     image_array_check = ['something', 'something', []]
     image_array_check = next(os.walk(f'{OUTPUT}/media/original'))
+    print(f'Found New: {len(image_array[2]) - len(image_array_check[2])}')
 
     for count, image in enumerate(image_array[2], start=1):
         
         if image in image_array_check[2] or image == 'gitkeep':
             continue
-
-        print(f'Processing image {count}/{len(image_array[2]) - len(image_array_check[2])}')
+        
+        print('Processing {0:50} {1}/{2}'.format(image, count, len(image_array[2]) - len(image_array_check[2])))
         copy(f'{INPUT}/{image}', f'{OUTPUT}/media/original/{image}')
 
         with Image.open(f'{INPUT}/{image}') as im:
@@ -67,15 +78,17 @@ def prepare_images():
             im.thumbnail([1, 1], Image.LANCZOS)
             im.save(f'{OUTPUT}/media/exif/{image}', optimize=True, exif=EXIF)
             
-    prepape_website(sorted(image_array[2], reverse=True))
+    prepare_website(sorted(image_array[2], reverse=True))
     return True
 
-def prepape_website(images):
+# Website generation
+
+def prepare_website(images):
     a = Airium()
     
+    print('Creating website...')
     copytree('./public', f'{OUTPUT}/public', dirs_exist_ok=True)
     
-    print('Creating website...')
     a('<!DOCTYPE html>')
     with a.html(lang="en"):
         with a.head():
@@ -87,9 +100,10 @@ def prepape_website(images):
 
             a.title(_t=CONFIG["OPENGRAPH"].get("WEBSITE_TITLE"))
             a.link(rel="stylesheet", href="public/index.css")
+            a.link(rel="stylesheet", href="https://fonts.googleapis.com/icon?family=Material+Icons")
 
-        with a.body(klass="adaptive"):
-            with a.nav():
+        with a.body():
+            with a.div(klass="header"):
                 with a.h1(style="font-weight: 600;"):
                     a('Radiquum')
                 with a.p():
@@ -100,28 +114,27 @@ def prepape_website(images):
         with a.div(klass="modal", id="modal"):
             a.img(klass="modal-image modal-content", id="modal-image", src="", alt="")
             a.div(klass="modal-background", id="modal-background")
-            with a.div(klass="image-nav", id="image-nav"):
-                with a.span(id="copy"):
-                    a('🔗') 
-                with a.a('download', id="download", href=""):
-                    a('💾') 
-                with a.span('info', id="info"):
-                    a('📋') 
-                with a.span(id="close"):
-                    a('❌') 
-
+            with a.div(klass="modal-navigation", id="modal-navigation"):
+                with a.span(id="copy", klass="material-icons"):
+                    a('share')
+                with a.a('download', id="download", klass="material-icons", href=""):
+                    a('download')
+                with a.span(id="info", klass="material-icons"):
+                    a("info") 
+                with a.span(id="close", klass="material-icons"):
+                    a("close") 
                         
         with a.images():
             for image in images:
                 if image == 'gitkeep':
                     continue
-                with a.div(klass="img"):
-                    a.img(klass="img clickable", src=f"media/small/{image}", large=f"media/large/{image}", alt=image, loading="lazy")
+                with a.div(klass="img", tabindex=0):
+                    a.img(klass="img clickable", src=f"media/small/{image}", alt=image, loading="lazy", tabindex=-1)
                     with a.div(klass="image-overlay", id="image-overlay"):
-                        with a.span(id="copy-overlay", url=f'media/original/{image}'):
-                            a('🔗') 
-                        with a.a('download', id="download-overlay", href=f"media/original/{image}"):
-                            a('💾') 
+                        with a.span(id="copy-overlay", klass="material-icons", url=f'media/original/{image}', tabindex=-1):
+                            a('share')
+                        with a.a('download', id="download-overlay", klass="material-icons", href=f"media/original/{image}", tabindex=-1):
+                            a("download")
                     
         a.script(type='text/javascript', src='public/preview.js')
         a.script(type='text/javascript', src='public/tags.js')
