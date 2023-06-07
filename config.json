@@ -9,6 +9,12 @@
       500,
       500
    ],
+   "ZIP": false,
+   "WEB": {
+      "TITLE": "<h1 style=\"font-weight: 600;\">Radiquum</h1><p>Photos</p>",
+      "SOCIAL_IMG": "Bento-Logo.svg",
+      "SOCIAL_URL": "https://bento.me/radiquum"
+   },
    "OPENGRAPH": {
       "WEBSITE_TITLE": "Radiquum Photos",
       "WEBSITE_DESCRIPTION": "Public gallery of https://bento.me/radiquum",
