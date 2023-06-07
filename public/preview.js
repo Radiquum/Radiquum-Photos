@@ -39,19 +39,12 @@ img.forEach((item) => {
     
         document.getElementById('modal-image').src = website_url + "media/large/" + image;
         document.getElementById('download').href = website_url + "media/original/" + image;
-        globalThis.url = website_url + "media/original/" + image;
+        const copy = document.getElementById("copy");
+        copy.onclick = function() { 
+            copy_link(website_url + "media/original/" + image)
+            open_popup()
+            setTimeout(close_popup, 1000)
+       };
     });
 });
 
-const copy = document.getElementById("copy");
-copy.onclick = function() { 
-    navigator.clipboard.writeText(url);
-};
-
-const copy_over = document.querySelectorAll('#copy-overlay')
-copy_over.forEach((item) => {
-    let url = website_url + item.getAttribute("url");
-    item.addEventListener('click', () => {
-        navigator.clipboard.writeText(url);
-    });
-});

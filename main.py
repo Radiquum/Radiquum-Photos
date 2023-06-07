@@ -2,9 +2,10 @@
 
 from PIL import Image, ImageOps
 import os
-from shutil import copy, copytree
+from shutil import copy, copytree, make_archive
 from airium import Airium
 import json
+import datetime
 
 
 # Default config
@@ -14,11 +15,19 @@ CONFIG = {
     "OUTPUT": 'web',
     "LARGE_SIZE": [1000, 1000],
     "SMALL_SIZE": [500, 500],
+    "ZIP": False,
+    
+    "WEB":
+        {
+            "TITLE": '<h1 style="font-weight: 600;">Radiquum</h1><p>Photos</p>',
+            "SOCIAL_IMG": 'Bento-Logo.svg',
+            "SOCIAL_URL":  'https://bento.me/radiquum',
+        },
+    
     "OPENGRAPH": {
         "WEBSITE_TITLE": "Radiquum Photos",
         "WEBSITE_DESCRIPTION": "Public gallery of https://bento.me/radiquum",
         "WEBSITE_URL": "https://photos.radiquum.wah.su",
-        "WEBSITE_IMAGE": None
     }
 }
 
@@ -79,6 +88,10 @@ def prepare_images():
             im.thumbnail([1, 1], Image.LANCZOS)
             im.save(f'{OUTPUT}/media/exif/{image}', optimize=True, exif=EXIF)
     
+    if CONFIG.get("ZIP") == True:
+        print('Creating ZIP...')
+        make_archive(f'{OUTPUT}/public/{datetime.datetime.now():%Y-%m-%d}', 'zip', INPUT)
+    
     prepare_website(sorted(image_array[2], reverse=True))
     return True
 
@@ -87,7 +100,7 @@ def prepare_images():
 def image_add(a, image, orint):
     with a.div(klass=f"img {orint}", tabindex=0):
         a.img(klass="img clickable", src=f"media/small/{image}", alt=image, loading="lazy", tabindex=-1)
-        with a.div(klass="image-overlay {orint}", id="image-overlay"):
+        with a.div(klass="image-overlay", id="image-overlay"):
             with a.span(id="copy-overlay", klass="material-icons", url=f'media/original/{image}', tabindex=-1):
                 a('share')
             with a.a('download', id="download-overlay", klass="material-icons", href=f"media/original/{image}", tabindex=-1):
@@ -100,19 +113,20 @@ def prepare_website(images):  # sourcery skip: extract-method
     copytree('./public', f'{OUTPUT}/public', dirs_exist_ok=True)
     
     #generate og:image
+    OPENGRAPH_IMAGE = None
+    if images[0] != 'gitkeep':
+        opengraph_image = Image.open(f'{OUTPUT}/media/large/{images[0]}')
+        opengraph_foreground = Image.open(f"{OUTPUT}/public/favicon/android-chrome-256x256.png")
+        img_w, img_h = opengraph_foreground.size
+        bg_w, bg_h = opengraph_image.size
+        offset = ((bg_w - img_w) // 2, (bg_h - img_h) // 2)
+        opengraph_image.paste(opengraph_foreground, offset, opengraph_foreground)
+        
+        opengraph_image.save(f"{OUTPUT}/public/opengraph.png")
+        opengraph_foreground.close()
+        opengraph_image.close()
     
-    opengraph_image = Image.open(f'{OUTPUT}/media/large/{images[0]}')
-    opengraph_foreground = Image.open(f"{OUTPUT}/public/favicon/android-chrome-256x256.png")
-    img_w, img_h = opengraph_foreground.size
-    bg_w, bg_h = opengraph_image.size
-    offset = ((bg_w - img_w) // 2, (bg_h - img_h) // 2)
-    opengraph_image.paste(opengraph_foreground, offset, opengraph_foreground)
-    
-    opengraph_image.save(f"{OUTPUT}/public/opengraph.png")
-    opengraph_foreground.close()
-    opengraph_image.close()
-    
-    CONFIG["OPENGRAPH"]["WEBSITE_IMAGE"] = f'{CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/public/opengraph.png'
+        OPENGRAPH_IMAGE = f'{CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/public/opengraph.png'
     
     a('<!DOCTYPE html>')
     with a.html(lang="en"):
@@ -137,8 +151,9 @@ def prepare_website(images):  # sourcery skip: extract-method
             a.meta(property="og:description", content=CONFIG["OPENGRAPH"].get("WEBSITE_DESCRIPTION"))
             a.meta(property="twitter:description", content=CONFIG["OPENGRAPH"].get("WEBSITE_DESCRIPTION"))
             a.meta(property="og:url", content=CONFIG["OPENGRAPH"].get("WEBSITE_URL"))
-            a.meta(property="og:image", content=CONFIG["OPENGRAPH"].get("WEBSITE_IMAGE"))
-            a.meta(property="twitter:image", content=CONFIG["OPENGRAPH"].get("WEBSITE_IMAGE"))
+            if OPENGRAPH_IMAGE is not None:
+                a.meta(property="og:image", content=OPENGRAPH_IMAGE)
+                a.meta(property="twitter:image", content=OPENGRAPH_IMAGE)
             a.meta(property="twitter:card", content="summary_large_image")
             
             
@@ -147,12 +162,16 @@ def prepare_website(images):  # sourcery skip: extract-method
 
         with a.body():
             with a.div(klass="header"):
-                with a.h1(style="font-weight: 600;"):
-                    a('Radiquum')
-                with a.p():
-                    a('Photos')
-                with a.a(href="https://bento.me/radiquum", klass="bento"):
-                    a.img(src="public/Bento-Logo.svg", klass="bento", alt="")
+                a(CONFIG['WEB'].get('TITLE'))
+                with a.div(klass="header-links"):
+                    if CONFIG['WEB'].get('SOCIAL_URL') is not None and CONFIG['WEB'].get('SOCIAL_IMG') is not None:
+                        with a.a(href=CONFIG['WEB'].get('SOCIAL_URL'), klass="social"):
+                            a.img(src=f"public/{CONFIG['WEB'].get('SOCIAL_IMG')}", klass="social", alt="")
+                    with a.span(id="share", klass="material-icons"):
+                        a('share')
+                    if os.path.isfile(f"{OUTPUT}/public/{datetime.datetime.now():%Y-%m-%d}.zip"):
+                        with a.a('download', href=f"public/{datetime.datetime.now():%Y-%m-%d}.zip", klass="zip material-icons"):
+                            a('folder_zip')
                         
         with a.div(klass="modal", id="modal"):
             a.img(klass="modal-image modal-content", id="modal-image", src="", alt="")
@@ -179,8 +198,15 @@ def prepare_website(images):  # sourcery skip: extract-method
                         image_add(a, image, 'square')
                     else:
                         image_add(a, image, 'vertical')
+                        
+        with a.div(klass="copy-popup", id="copy-popup"):
+            with a.span(klass="material-icons"):
+                a('check_circle')
+            with a.p():
+                a('link copied!')
                     
         a.script(type='text/javascript', src='public/preview.js')
+        a.script(type='text/javascript', src='public/copy.js')
         a.script(type='text/javascript', src='public/tags.js')
         a.script(type='text/javascript', src='https://cdn.jsdelivr.net/npm/exif-js')
                     
@@ -188,7 +214,6 @@ def prepare_website(images):  # sourcery skip: extract-method
     html = str(a)
     with open(f'{OUTPUT}/index.html', 'w', encoding='utf-8') as index:
         index.write(html)
-        
-        
+
 if __name__ == "__main__":
     prepare_images()

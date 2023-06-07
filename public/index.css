@@ -1,10 +1,12 @@
+/* Font import */
 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;600&display=swap');
-
+/* Reset */
 * {
     margin: 0;
     padding: 0;
 }
 
+/* Body styles */
 
 body {
     font-family: 'Kanit', sans-serif;
@@ -15,7 +17,7 @@ body {
     body, .image-overlay{
       background-color: #0b132b;
     }
-    .header, span, a, i{
+    .header, .header-links > *, .image-overlay > *, .modal-navigation > *{
         color: #fbaccd;
       }
     }
@@ -24,7 +26,7 @@ body {
     body, .image-overlay{
         background-color: rgba(240, 248, 255, 1);
     }
-    .header, span, a, i{
+    .header, .header-links > *, .image-overlay > *, .modal-navigation > *{
         color: #ff7b86;
     }
 }
@@ -33,29 +35,38 @@ span, a {
     cursor: pointer;
 }
 
+/* Header */
 
 .header {
     display: flex;
     flex-wrap: wrap;
-    margin-left: 1rem;
+    margin-inline: 2rem;
     padding-top: 1rem;
     font-size: 24px;
 }
 
-.bento {
-    width: 48px; 
-    height: 48px;
-    align-self: center;
-    margin-left: 0.5rem;
-    transition: scale 0.1s;
+.header-links {
+    margin-left: auto;
+    display: flow-root;
+}
+.header-links > * {
+    font-size: 48px !important;
+    padding: 1rem;
 }
 
+.social {
+    width: 48px; 
+    height: 48px;
+    display: inline-block;
+}
+
+/* Main content */
 
 images {
     display: grid;
     grid-template-columns: repeat( auto-fill, 300px );
     margin-inline: auto;
-    margin-block: 2rem;
+    margin-block: 1rem;
     gap: 0.5rem;
     justify-content: center;
     justify-items: center;
@@ -112,6 +123,8 @@ images {
     font-size: 32px !important;
 }
 
+/* preview modal */
+
 .modal {
     position: fixed;
     opacity: 0;
@@ -162,6 +175,8 @@ images {
     opacity: 0.75;
 }
 
+/* Animations */
+
 .modal-navigation > *, .image-overlay > * {
     transition: scale 0.2s, opacity 0.1s;
 }
@@ -174,14 +189,37 @@ images {
     scale: 1;
 }
 
-.modal.flex{
+.modal.flex, .copy-popup.flex{
     display: flex;
 }
 
-.modal.opacity, .modal-background.opacity, .modal-image.opacity, .modal-navigation.opacity, .modal-navigation > *:hover, .image-overlay > *:hover {
+.modal.opacity, .modal-background.opacity, .modal-image.opacity, .modal-navigation.opacity, .modal-navigation > *:hover, .image-overlay > *:hover, .copy-popup.opacity {
     opacity: 1;
 }
 
+/* Copy popup */
+
+.copy-popup {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    width: fit-content;
+    background-color: #363537;
+    color: #8cd867;
+    padding: 1rem;
+    align-items: center;
+    border-radius: 16px;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 2;
+}
+
+.copy-popup > * {
+    font-size: 32px !important;
+    margin-inline: 0.3rem;
+}
+/* Responsive */
 
 .modal-content {
     width:auto;
