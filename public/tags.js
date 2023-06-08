@@ -4,7 +4,7 @@ exif_info.onclick = function() {
 }
 
 function getExif() {
-    let img = document.getElementById('modal-image').src.split('large')[0] + "exif" + document.getElementById('modal-image').src.split('large')[1];
+    let img = document.getElementById('modal-image').src;
 
     var http = new XMLHttpRequest();
     http.open("GET", img, true);

@@ -3,8 +3,7 @@ copy_over.forEach((item) => {
     let url = website_url + item.getAttribute("url");
     item.addEventListener('click', () => {
         copy_link(url)
-        open_popup()
-        setTimeout(close_popup, 1000)
+        
     });
 });
 
@@ -12,8 +11,7 @@ const share = document.getElementById("share");
 share.onclick = function() { 
     let url = website_url
     copy_link(url)
-    open_popup()
-    setTimeout(close_popup, 1000)
+
 };
 
 const copy_popup = document.getElementById('copy-popup');
@@ -30,9 +28,7 @@ function open_popup() {
 }
 
 function copy_link(url) {
-    navigator.permissions.query({name: "clipboard-write"}).then((result) => {
-        if (result.state === "granted" || result.state === "prompt") {
-            navigator.clipboard.writeText(url);
-        }
-      });
+        navigator.clipboard.writeText(url);
+        open_popup()
+        setTimeout(close_popup, 1000)
 }

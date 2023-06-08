@@ -1,5 +1,6 @@
 /* Font import */
-@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;600&display=swap');
+@import url('https://fonts.upset.dev/css2?family=Kanit:wght@300;600&display=swap');
+@import url('https://fonts.upset.dev/css2?family=Material+Icons');
 /* Reset */
 * {
     margin: 0;
@@ -92,6 +93,10 @@ images {
     object-fit: cover;
     transition: scale 0.1s, border-radius 0.1s;
     width: 300px;
+}
+
+div.img {
+    background-color: lightblue;
 }
 
 .img:where(:hover, :focus){
@@ -231,11 +236,19 @@ images {
 @media (orientation: landscape) { .modal-content { height:90%; } }
 @media (orientation: portrait) { .modal-content { width:90%; } }
 
-@media only screen and (max-width: 1000px){
-    .modal-navigation {
-        height: 124px;
+@media only screen and (max-width: 750px){
+    .header-links {
+        margin-left: 0;
+        display: flow-root;
     }
-    .modal-navigation > * {
-        font-size: 96px !important;
+    images {
+        grid-template-columns: repeat( auto-fill, 175px );
+    }
+    .img.square, .img.square > img{
+        height: 175px;
+        width: 175px;
+    }
+    .img {
+        width: 175px;
     }
 }
