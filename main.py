@@ -14,7 +14,7 @@ CONFIG = {
     "INPUT": 'gallery',
     "OUTPUT": 'web',
     "LARGE_SIZE": [1000, 1000],
-    "SMALL_SIZE": [500, 500],
+    "SMALL_SIZE": [300, 300],
     "ZIP": False,
     
     "WEB":
@@ -22,6 +22,7 @@ CONFIG = {
             "TITLE": '<h1 style="font-weight: 600;">Radiquum</h1><p>Photos</p>',
             "SOCIAL_IMG": 'Bento-Logo.svg',
             "SOCIAL_URL":  'https://bento.me/radiquum',
+            "USE_CDN": True,
         },
     
     "OPENGRAPH": {
@@ -58,8 +59,8 @@ def prepare_images():
 
     os.makedirs(f'{OUTPUT}/media/original', exist_ok=True)
     os.makedirs(f'{OUTPUT}/media/large', exist_ok=True)
-    os.makedirs(f'{OUTPUT}/media/small', exist_ok=True)
-    os.makedirs(f'{OUTPUT}/media/exif', exist_ok=True)
+    if CONFIG["WEB"].get("USE_CDN") != True:
+        os.makedirs(f'{OUTPUT}/media/small', exist_ok=True)
     os.makedirs(f'{OUTPUT}/public', exist_ok=True)
 
     print('Updating images...')
@@ -76,17 +77,14 @@ def prepare_images():
         copy(f'{INPUT}/{image}', f'{OUTPUT}/media/original/{image}')
 
         with Image.open(f'{INPUT}/{image}') as im:
-            EXIF = im.getexif()
             im = ImageOps.exif_transpose(im)
+            EXIF = im.getexif()
             
             im.thumbnail(CONFIG.get('LARGE_SIZE'), Image.LANCZOS)
-            im.save(f'{OUTPUT}/media/large/{image}')
-
-            im.thumbnail(CONFIG.get('SMALL_SIZE'), Image.LANCZOS)
-            im.save(f'{OUTPUT}/media/small/{image}', optimize=True)
-            
-            im.thumbnail([1, 1], Image.LANCZOS)
-            im.save(f'{OUTPUT}/media/exif/{image}', optimize=True, exif=EXIF)
+            im.save(f'{OUTPUT}/media/large/{image}', optimize=True, exif=EXIF)
+            if CONFIG["WEB"].get("USE_CDN") != True:
+                im.thumbnail(CONFIG.get('SMALL_SIZE'), Image.LANCZOS)
+                im.save(f'{OUTPUT}/media/small/{image}', optimize=True, quality=100)
     
     if CONFIG.get("ZIP") == True:
         print('Creating ZIP...')
@@ -98,8 +96,17 @@ def prepare_images():
 # Website generation
 
 def image_add(a, image, orint):
-    with a.div(klass=f"img {orint}", tabindex=0):
-        a.img(klass="img clickable", src=f"media/small/{image}", alt=image, loading="lazy", tabindex=-1)
+    with a.div(klass=f"img {orint}"):
+        if CONFIG["WEB"].get("USE_CDN") == True:
+            a.img(klass="img clickable",\
+                srcset=f'//wsrv.nl/?url={CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/large/{image}&w=175&h=175 175w, \
+                    //wsrv.nl/?url={CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/large/{image}&w=300&h=300 300w, \
+                    //wsrv.nl/?url={CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/large/{image}&w=475&h=475 475w',\
+                    sizes="(max-width: 700px) 175px, (max-resolution: 1dppx) and (min-width: 1400px) 475px, 300px",\
+                    src=f'//wsrv.nl/?url={CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/large/{image}&w=475&h=475', alt=image, tabindex=0, loading="lazy")
+        else:
+            a.img(klass="img clickable", src=f"media/small/{image}", alt=image, loading="lazy", tabindex=0)
+        
         with a.div(klass="image-overlay", id="image-overlay"):
             with a.span(id="copy-overlay", klass="material-icons", url=f'media/original/{image}', tabindex=-1):
                 a('share')
@@ -132,6 +139,7 @@ def prepare_website(images):  # sourcery skip: extract-method
     with a.html(lang="en"):
         with a.head():
             a.meta(charset="utf-8")
+            a.meta(name="viewport", content="width=device-width")
             a.title(_t=CONFIG["OPENGRAPH"].get("WEBSITE_TITLE"))
             a.meta(name="description", content=CONFIG["OPENGRAPH"].get("WEBSITE_DESCRIPTION"))
             
@@ -158,7 +166,6 @@ def prepare_website(images):  # sourcery skip: extract-method
             
             
             a.link(rel="stylesheet", href="public/index.css")
-            a.link(rel="stylesheet", href="https://fonts.googleapis.com/icon?family=Material+Icons")
 
         with a.body():
             with a.div(klass="header"):
@@ -166,7 +173,7 @@ def prepare_website(images):  # sourcery skip: extract-method
                 with a.div(klass="header-links"):
                     if CONFIG['WEB'].get('SOCIAL_URL') is not None and CONFIG['WEB'].get('SOCIAL_IMG') is not None:
                         with a.a(href=CONFIG['WEB'].get('SOCIAL_URL'), klass="social"):
-                            a.img(src=f"public/{CONFIG['WEB'].get('SOCIAL_IMG')}", klass="social", alt="")
+                            a.img(src=f"public/{CONFIG['WEB'].get('SOCIAL_IMG')}", klass="social", alt="Social Link.")
                     with a.span(id="share", klass="material-icons"):
                         a('share')
                     if os.path.isfile(f"{OUTPUT}/public/{datetime.datetime.now():%Y-%m-%d}.zip"):
@@ -191,7 +198,7 @@ def prepare_website(images):  # sourcery skip: extract-method
                 if image == 'gitkeep':
                     continue
                 
-                with Image.open(f'{OUTPUT}/media/small/{image}') as im:
+                with Image.open(f'{OUTPUT}/media/large/{image}') as im:
                     if im.width > im.height:
                         image_add(a, image, 'horizontal')
                     elif im.width == im.height :

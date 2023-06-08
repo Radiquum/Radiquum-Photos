@@ -14,7 +14,7 @@ modal_close.onclick = function() {
     close()
 };
 
-function close() {
+const close = function() {
     modal_image.classList.remove('opacity');
     modal_nav.classList.remove('opacity')    
     setTimeout(function() {
@@ -22,13 +22,13 @@ function close() {
         setTimeout(function() {
             modal.classList.remove('flex');
             modal.classList.remove('opacity')
+            modal_image.src = ''
+            modal_image.style = ''
         }, 600);
 };
 
-img.forEach((item) => {
-    let image = item.getAttribute("alt");
+const open = function(image) {
 
-    item.addEventListener('click', function () {
         modal.classList.add('flex');
         setTimeout(function() {
             modal.classList.add('opacity')
@@ -36,15 +36,30 @@ img.forEach((item) => {
             modal_nav.classList.add('opacity')    
             modal_background.classList.add('opacity')    
         }, 10);
-    
-        document.getElementById('modal-image').src = website_url + "media/large/" + image;
+        
+        modal_image.src = website_url + "media/large/" + image;
         document.getElementById('download').href = website_url + "media/original/" + image;
         const copy = document.getElementById("copy");
         copy.onclick = function() { 
             copy_link(website_url + "media/original/" + image)
-            open_popup()
-            setTimeout(close_popup, 1000)
        };
-    });
-});
+};
 
+img.forEach((item) => {
+    let image = item.getAttribute("alt");
+
+    item.addEventListener("keydown", function(event){ 
+        if (event.code === "Enter") {
+            open(image);
+        }
+        
+        if (event.code === "Escape") {
+            close();
+        }
+       }
+    );
+
+    item.addEventListener("click", function() { open(image) })
+
+    }
+);
