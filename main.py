@@ -177,7 +177,8 @@ def prepare_website(images):  # sourcery skip: extract-method
 
         with a.body():
             with a.div(klass="header"):
-                a(CONFIG['WEB'].get('TITLE'))
+                with a.div(klass="header-title"):
+                    a(CONFIG['WEB'].get('TITLE'))
                 with a.div(klass="header-links"):
                     if CONFIG['WEB'].get('SOCIAL_URL') is not None and CONFIG['WEB'].get('SOCIAL_IMG') is not None:
                         with a.a(href=CONFIG['WEB'].get('SOCIAL_URL'), klass="social"):

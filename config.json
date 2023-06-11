@@ -11,7 +11,7 @@
    ],
    "ZIP": false,
    "WEB": {
-      "TITLE": "<h1 style=\"font-weight: 600;\">Radiquum</h1><p>Photos</p>",
+      "TITLE": "<h1 style=\"font-weight: 600; font-size: 48px;\">Radiquum</h1><p style=\"font-size: 24px;\">Photos</p>",
       "SOCIAL_IMG": "Bento-Logo.svg",
       "SOCIAL_URL": "https://bento.me/radiquum",
       "USE_CDN": true
