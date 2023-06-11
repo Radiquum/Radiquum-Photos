@@ -85,6 +85,8 @@ def prepare_images():
             if CONFIG["WEB"].get("USE_CDN") != True:
                 im.thumbnail(CONFIG.get('SMALL_SIZE'), Image.LANCZOS)
                 im.save(f'{OUTPUT}/media/small/{image}', optimize=True, quality=100)
+                im.thumbnail([25, 25], Image.LANCZOS)
+                im.save(f'{OUTPUT}/media/small/25-{image}', optimize=True, quality=100)
     
     if CONFIG.get("ZIP") == True:
         print('Creating ZIP...')
@@ -96,22 +98,28 @@ def prepare_images():
 # Website generation
 
 def image_add(a, image, orint):
-    with a.div(klass=f"img {orint}"):
-        if CONFIG["WEB"].get("USE_CDN") == True:
+    if CONFIG["WEB"].get("USE_CDN") == True:
+        with a.div(klass=f"img {orint} blur-img", style=f'background-image: url(//wsrv.nl/?url={CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/large/{image}&w=25&h=25)'):
             a.img(klass="img clickable",\
                 srcset=f'//wsrv.nl/?url={CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/large/{image}&w=175&h=175 175w, \
                     //wsrv.nl/?url={CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/large/{image}&w=300&h=300 300w, \
                     //wsrv.nl/?url={CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/large/{image}&w=475&h=475 475w',\
                     sizes="(max-width: 700px) 175px, (max-resolution: 1dppx) and (min-width: 1400px) 475px, 300px",\
-                    src=f'//wsrv.nl/?url={CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/large/{image}&w=475&h=475', alt=image, tabindex=0, loading="lazy")
-        else:
+                    src=f'//wsrv.nl/?url={CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/large/{image}&w=475&h=475', loading="lazy", alt=image, tabindex=0)
+            
+            with a.div(klass="image-overlay", id="image-overlay"):
+                with a.span(id="copy-overlay", klass="material-icons", url=f'media/original/{image}', tabindex=-1):
+                    a('share')
+                with a.a('download', id="download-overlay", klass="material-icons", href=f"media/original/{image}", tabindex=-1):
+                    a("download")
+    else:
+        with a.div(klass=f"img {orint} blur-img", style=f'background-image: url(media/small/25-{image})'):
             a.img(klass="img clickable", src=f"media/small/{image}", alt=image, loading="lazy", tabindex=0)
-        
-        with a.div(klass="image-overlay", id="image-overlay"):
-            with a.span(id="copy-overlay", klass="material-icons", url=f'media/original/{image}', tabindex=-1):
-                a('share')
-            with a.a('download', id="download-overlay", klass="material-icons", href=f"media/original/{image}", tabindex=-1):
-                a("download")
+            with a.div(klass="image-overlay", id="image-overlay"):
+                with a.span(id="copy-overlay", klass="material-icons", url=f'media/original/{image}', tabindex=-1):
+                    a('share')
+                with a.a('download', id="download-overlay", klass="material-icons", href=f"media/original/{image}", tabindex=-1):
+                    a("download")
                             
 def prepare_website(images):  # sourcery skip: extract-method
     a = Airium()
@@ -212,6 +220,7 @@ def prepare_website(images):  # sourcery skip: extract-method
             with a.p():
                 a('link copied!')
                     
+        a.script(type='text/javascript', src='public/images.js')
         a.script(type='text/javascript', src='public/preview.js')
         a.script(type='text/javascript', src='public/copy.js')
         a.script(type='text/javascript', src='public/tags.js')

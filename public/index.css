@@ -73,16 +73,20 @@ images {
     justify-items: center;
 }
 
-.img.vertical, .img.vertical > img{
+.vertical, .vertical > img{
     grid-row: span 2;
     height: 100%;
+    min-height: 300px;
+    min-width: 300px;
 }
 
-.img.horizontal, .img.horizontal > img{
+.horizontal, .horizontal > img{
     height: 100%;
+    min-height: 300px;
+    min-width: 300px;
 }
 
-.img.square, .img.square > img{
+.square, .square > img{
     height: 300px;
     width: 300px;
 }
@@ -96,7 +100,9 @@ images {
 }
 
 div.img {
-    background-color: lightblue;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 .img:where(:hover, :focus){
@@ -126,6 +132,15 @@ div.img {
 .image-overlay > * {
     opacity: 0.5;
     font-size: 32px !important;
+}
+
+.blur-img.loaded > img {
+    opacity: 1;
+}
+
+.blur-img > img {
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
 }
 
 /* preview modal */
@@ -244,11 +259,21 @@ div.img {
     images {
         grid-template-columns: repeat( auto-fill, 175px );
     }
-    .img.square, .img.square > img{
-        height: 175px;
-        width: 175px;
-    }
     .img {
         width: 175px;
     }
+    .square, .square > img{
+        height: 175px;
+        width: 175px;
+    }
+    .vertical, .vertical > img{
+        min-height: 175px;
+        min-width: 175px;
+    }
+    
+    .horizontal, .horizontal > img{
+        min-height: 175px;
+        min-width: 175px;
+    }
+
 }
