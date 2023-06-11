@@ -228,7 +228,7 @@ div.img {
     transition: scale 0.2s, opacity 0.1s;
 }
 
-:is(.img, a, span, .bento):where(:hover, :focus) {
+:is(div.img, a, span, .bento):where(:hover, :focus) {
     scale: 1.05;
 }
 
