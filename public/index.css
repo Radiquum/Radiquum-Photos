@@ -41,18 +41,23 @@ span, a {
 .header {
     display: flex;
     flex-wrap: wrap;
-    margin-inline: 2rem;
-    padding-top: 1rem;
-    font-size: 24px;
+    padding: 1.5rem;
+}
+
+.header-title {
+    display: flex;
+    align-items: baseline;
 }
 
 .header-links {
     margin-left: auto;
-    display: flow-root;
+    display: flex;
+    justify-content: space-around;
+    align-items: baseline;
+    width: 144px;
 }
 .header-links > * {
     font-size: 48px !important;
-    padding: 1rem;
 }
 
 .social {
@@ -67,7 +72,7 @@ images {
     display: grid;
     grid-template-columns: repeat( auto-fill, 300px );
     margin-inline: auto;
-    margin-block: 1rem;
+    margin-bottom: 4rem;
     gap: 1rem;
     justify-content: center;
     justify-items: center;
@@ -75,6 +80,7 @@ images {
 
 .vertical, .vertical > img{
     grid-row: span 2;
+    min-height: 460px;
     height: 100%;
 }
 
@@ -278,7 +284,6 @@ div.img {
 @media only screen and (max-width: 750px){
     .header-links {
         margin-left: 0;
-        display: flow-root;
     }
     images {
         grid-template-columns: repeat( auto-fill, 175px );
@@ -290,7 +295,9 @@ div.img {
         height: 175px;
         width: 175px;
     }
-    
+    .vertical, .vertical > img{
+        min-height: 274px;
+    }
     .horizontal, .horizontal > img{
         min-height: 137px;
     }
