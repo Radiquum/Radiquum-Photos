@@ -188,6 +188,9 @@ def prepare_website(images):  # sourcery skip: extract-method
                     if os.path.isfile(f"{OUTPUT}/public/{datetime.datetime.now():%Y-%m-%d}.zip"):
                         with a.a('download', href=f"public/{datetime.datetime.now():%Y-%m-%d}.zip", klass="zip material-icons"):
                             a('folder_zip')
+                    if CONFIG.get('RSS') == True:    
+                        with a.a(href="feed.xml", klass="material-icons"):
+                            a('rss_feed')
                         
         with a.div(klass="modal", id="modal"):
             with a.div(klass="modal-content blur-modal", id="modal-image-background"):
@@ -232,6 +235,38 @@ def prepare_website(images):  # sourcery skip: extract-method
     html = str(a)
     with open(f'{OUTPUT}/index.html', 'w', encoding='utf-8') as index:
         index.write(html)
+        
+    if CONFIG.get('RSS') == True:
+        prepare_rss(images)
+        
+def prepare_rss(images):  # sourcery skip: extract-method
+    rev_images = list(reversed(images))
+    a = Airium()
+    
+    print('Creating RSS...')
+    
+    a('<?xml version="1.0" encoding="UTF-8" ?>')
+    with a.rss('xmlns:atom="http://www.w3.org/2005/Atom"', version="2.0"):
+        with a.channel():
+            with a.title():
+                a(CONFIG["OPENGRAPH"].get("WEBSITE_TITLE"))
+            with a.description():
+                a(CONFIG["OPENGRAPH"].get("WEBSITE_DESCRIPTION"))
+            a(f'<link>{CONFIG["OPENGRAPH"].get("WEBSITE_URL")}</link>')
+            a(f'<atom:link href=\"{CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/feed.xml\" rel="self" type="application/rss+xml" />')
+                
+            for i in range(10):
+                with a.item():
+                    with a.title():
+                        a(f"New Photo: {rev_images[i]}")
+                    with a.description():
+                        a(f'<![CDATA[<img src=\"{CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/large/{rev_images[i]}\" alt="{rev_images[i]}">]]> <a href=\"{CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/original/{rev_images[i]}\">ORIGINAL IMAGE</a><span> | </span><a href=\"{CONFIG["WEB"].get("SOCIAL_URL")}\">SOCIAL</a>')
+                    a(f'<guid>{CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/original/{rev_images[i]}</guid>')
+                    a(f'<link>{CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/original/{rev_images[i]}</link>')
+
+    xml = str(a)
+    with open(f'{OUTPUT}/feed.xml', 'w', encoding='utf-8') as index:
+        index.write(xml)
 
 if __name__ == "__main__":
     prepare_images()
