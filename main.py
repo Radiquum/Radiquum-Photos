@@ -81,7 +81,7 @@ def prepare_images():
             EXIF = im.getexif()
             
             im.thumbnail(CONFIG.get('LARGE_SIZE'), Image.LANCZOS)
-            im.save(f'{OUTPUT}/media/large/{image}', optimize=True, exif=EXIF)
+            im.save(f'{OUTPUT}/media/large/{image}', exif=EXIF)
             if CONFIG["WEB"].get("USE_CDN") != True:
                 im.thumbnail(CONFIG.get('SMALL_SIZE'), Image.LANCZOS)
                 im.save(f'{OUTPUT}/media/small/{image}', optimize=True, quality=100)
@@ -190,7 +190,8 @@ def prepare_website(images):  # sourcery skip: extract-method
                             a('folder_zip')
                         
         with a.div(klass="modal", id="modal"):
-            a.img(klass="modal-image modal-content", id="modal-image", src="", alt="")
+            with a.div(klass="modal-content blur-modal", id="modal-image-background"):
+                a.img(klass="modal-image", id="modal-image", src="", alt="")
             a.div(klass="modal-background", id="modal-background")
             with a.div(klass="modal-navigation", id="modal-navigation"):
                 with a.span(id="copy", klass="material-icons"):

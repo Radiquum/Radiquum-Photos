@@ -2,8 +2,8 @@
    "INPUT": "gallery",
    "OUTPUT": "web",
    "LARGE_SIZE": [
-      1000,
-      1000
+      1500,
+      1500
    ],
    "SMALL_SIZE": [
       300,
