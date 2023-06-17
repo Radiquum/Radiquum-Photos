@@ -2,14 +2,15 @@
    "INPUT": "gallery",
    "OUTPUT": "web",
    "LARGE_SIZE": [
-      1000,
-      1000
+      1500,
+      1500
    ],
    "SMALL_SIZE": [
       300,
       300
    ],
    "ZIP": false,
+   "RSS": true,
    "WEB": {
       "TITLE": "<h1 style=\"font-weight: 600; font-size: 48px;\">Radiquum</h1><p style=\"font-size: 24px;\">Photos</p>",
       "SOCIAL_IMG": "Bento-Logo.svg",
