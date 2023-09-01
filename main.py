@@ -15,6 +15,7 @@ CONFIG = {
     "OUTPUT": 'web',
     "LARGE_SIZE": [1000, 1000],
     "SMALL_SIZE": [300, 300],
+    "LITE_SIZE": [100,100],
     "ZIP": False,
     "LITE": False,
     "WEB":
@@ -59,8 +60,10 @@ def prepare_images():
 
     os.makedirs(f'{OUTPUT}/media/original', exist_ok=True)
     os.makedirs(f'{OUTPUT}/media/large', exist_ok=True)
-    if CONFIG["WEB"].get("USE_CDN") != True or CONFIG.get("LITE") == True:
+    if CONFIG["WEB"].get("USE_CDN") != True:
         os.makedirs(f'{OUTPUT}/media/small', exist_ok=True)
+    if  CONFIG.get("LITE") == True:
+        os.makedirs(f'{OUTPUT}/lite', exist_ok=True)
     os.makedirs(f'{OUTPUT}/public', exist_ok=True)
 
     print('Updating images...')
@@ -82,11 +85,14 @@ def prepare_images():
             
             im.thumbnail(CONFIG.get('LARGE_SIZE'), Image.LANCZOS)
             im.save(f'{OUTPUT}/media/large/{image}', exif=EXIF)
-            if CONFIG["WEB"].get("USE_CDN") != True or CONFIG.get("LITE") == True:
+            if CONFIG["WEB"].get("USE_CDN") != True:
                 im.thumbnail(CONFIG.get('SMALL_SIZE'), Image.LANCZOS)
                 im.save(f'{OUTPUT}/media/small/{image}', optimize=True, quality=100)
                 im.thumbnail([25, 25], Image.LANCZOS)
                 im.save(f'{OUTPUT}/media/small/25-{image}', optimize=True, quality=100)
+            if CONFIG.get('LITE') == True:
+                im.thumbnail(CONFIG.get('LITE_SIZE'), Image.LANCZOS)
+                im.save(f'{OUTPUT}/lite/{image}', optimize=True, quality=80)
     
     if CONFIG.get("ZIP") == True:
         print('Creating ZIP...')
@@ -194,7 +200,7 @@ def prepare_website(images):  # sourcery skip: extract-method
                         with a.a(href="feed.xml", klass="material-icons"):
                             a('rss_feed')
                     if CONFIG.get('LITE') == True:
-                        with a.a(href="lite.html", klass="material-icons"):
+                        with a.a(href="lite", klass="material-icons"):
                             a('data_saver_on')
                         
         with a.div(klass="modal", id="modal"):
@@ -280,15 +286,13 @@ def prepare_rss(images):  # sourcery skip: extract-method
 def image_add_lite(a, image, orint):
         if orint == "horizontal":
             with a.div(style="width: 256px;"):
-                a.img(src=f"media/small/{image}", alt=image, style="width: 256px", tabindex=0)
+                a.img(src=f"{image}", alt=image, style="width: 256px;", tabindex=0)
         if orint == "vertical":
             with a.div(style="width: 128px"):
-                a.img(src=f"media/small/{image}", alt=image, style="width: 128px;", tabindex=0)
+                a.img(src=f"{image}", alt=image, style="width: 128px;", tabindex=0)
         if orint == "square":
             with a.div(style="width: 256px; height: 256px"):
-                a.img(src=f"media/small/{image}", alt=image, style="width: 256px; height: 256px", tabindex=0)
-        with a.a('download', href=f"media/large/{image}", tabindex=-1):
-            a("download")
+                a.img(src=f"{image}", alt=image, style="width: 256px; height: 256px", tabindex=0)
 
 def prepare_lite(images):  # sourcery skip: extract-method
     a = Airium()
@@ -302,11 +306,13 @@ def prepare_lite(images):  # sourcery skip: extract-method
 
         with a.body():
             with a.div():
-                with a.div(klass="header-lite"):
+                with a.div():
                     with a.h1():
                         a(CONFIG['OPENGRAPH'].get('WEBSITE_TITLE'))
+                with a.a(href="/"):
+                    a("<-Back--")
                         
-            with a.images(style="display:table;width: 100%;height: 100%;"):
+            with a.images(style="display:flex;flex-wrap:wrap;width: 100%;height: 100%;"):
                 for image in images:
                     if image == 'gitkeep':
                         continue
@@ -320,7 +326,7 @@ def prepare_lite(images):  # sourcery skip: extract-method
                             image_add_lite(a, image, 'vertical')
 
     html = str(a)
-    with open(f'{OUTPUT}/lite.html', 'w', encoding='utf-8') as index:
+    with open(f'{OUTPUT}/lite/index.html', 'w', encoding='utf-8') as index:
         index.write(html)        
 
 if __name__ == "__main__":

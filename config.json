@@ -9,6 +9,10 @@
       300,
       300
    ],
+   "LITE_SIZE": [
+      150,
+      150
+   ],
    "ZIP": false,
    "RSS": true,
    "LITE": true,
