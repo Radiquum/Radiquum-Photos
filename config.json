@@ -11,6 +11,7 @@
    ],
    "ZIP": false,
    "RSS": true,
+   "LITE": true,
    "WEB": {
       "TITLE": "<h1 style=\"font-weight: 600; font-size: 48px;\">Radiquum</h1><p style=\"font-size: 24px;\">Photos</p>",
       "SOCIAL_IMG": "Bento-Logo.svg",
