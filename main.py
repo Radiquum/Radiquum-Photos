@@ -59,7 +59,7 @@ def prepare_images():
 
     os.makedirs(f'{OUTPUT}/media/original', exist_ok=True)
     os.makedirs(f'{OUTPUT}/media/large', exist_ok=True)
-    if CONFIG["WEB"].get("USE_CDN") != True:
+    if CONFIG["WEB"].get("USE_CDN") != True or CONFIG.get("LITE") == True:
         os.makedirs(f'{OUTPUT}/media/small', exist_ok=True)
     os.makedirs(f'{OUTPUT}/public', exist_ok=True)
 
@@ -82,7 +82,7 @@ def prepare_images():
             
             im.thumbnail(CONFIG.get('LARGE_SIZE'), Image.LANCZOS)
             im.save(f'{OUTPUT}/media/large/{image}', exif=EXIF)
-            if CONFIG["WEB"].get("USE_CDN") != True:
+            if CONFIG["WEB"].get("USE_CDN") != True or CONFIG.get("LITE") == True:
                 im.thumbnail(CONFIG.get('SMALL_SIZE'), Image.LANCZOS)
                 im.save(f'{OUTPUT}/media/small/{image}', optimize=True, quality=100)
                 im.thumbnail([25, 25], Image.LANCZOS)
@@ -279,15 +279,15 @@ def prepare_rss(images):  # sourcery skip: extract-method
 
 def image_add_lite(a, image, orint):
         if orint == "horizontal":
-            with a.div(style="width: 512px;"):
-                a.img(src=f"media/large/{image}", alt=image, style="width: 512px", tabindex=0)
+            with a.div(style="width: 256px;"):
+                a.img(src=f"media/small/{image}", alt=image, style="width: 256px", tabindex=0)
         if orint == "vertical":
-            with a.div(style="width: 256px"):
-                a.img(src=f"media/large/{image}", alt=image, style="width: 256px;", tabindex=0)
+            with a.div(style="width: 128px"):
+                a.img(src=f"media/small/{image}", alt=image, style="width: 128px;", tabindex=0)
         if orint == "square":
-            with a.div(style="width: 512px; height: 512px"):
-                a.img(src=f"media/large/{image}", alt=image, style="width: 512px; height: 512px", tabindex=0)
-        with a.a('download', href=f"media/original/{image}", tabindex=-1):
+            with a.div(style="width: 256px; height: 256px"):
+                a.img(src=f"media/small/{image}", alt=image, style="width: 256px; height: 256px", tabindex=0)
+        with a.a('download', href=f"media/large/{image}", tabindex=-1):
             a("download")
 
 def prepare_lite(images):  # sourcery skip: extract-method
@@ -303,7 +303,8 @@ def prepare_lite(images):  # sourcery skip: extract-method
         with a.body():
             with a.div():
                 with a.div(klass="header-lite"):
-                    a.h1(CONFIG['OPENGRAPH'].get('WEBSITE_TITLE'))
+                    with a.h1():
+                        a(CONFIG['OPENGRAPH'].get('WEBSITE_TITLE'))
                         
             with a.images(style="display:table;width: 100%;height: 100%;"):
                 for image in images:
