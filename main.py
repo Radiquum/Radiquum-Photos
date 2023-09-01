@@ -16,7 +16,7 @@ CONFIG = {
     "LARGE_SIZE": [1000, 1000],
     "SMALL_SIZE": [300, 300],
     "ZIP": False,
-    
+    "LITE": False,
     "WEB":
         {
             "TITLE": '<h1 style="font-weight: 600;">Radiquum</h1><p>Photos</p>',
@@ -193,6 +193,9 @@ def prepare_website(images):  # sourcery skip: extract-method
                     if CONFIG.get('RSS') == True:    
                         with a.a(href="feed.xml", klass="material-icons"):
                             a('rss_feed')
+                    if CONFIG.get('LITE') == True:
+                        with a.a(href="lite.html", klass="material-icons"):
+                            a('data_saver_on')
                         
         with a.div(klass="modal", id="modal"):
             with a.div(klass="modal-content blur-modal", id="modal-image-background"):
@@ -240,7 +243,10 @@ def prepare_website(images):  # sourcery skip: extract-method
         
     if CONFIG.get('RSS') == True:
         prepare_rss(images)
-        
+    
+    if CONFIG.get('LITE') == True:
+        prepare_lite(images)
+
 def prepare_rss(images):  # sourcery skip: extract-method
     a = Airium()
     
@@ -269,6 +275,52 @@ def prepare_rss(images):  # sourcery skip: extract-method
     xml = str(a)
     with open(f'{OUTPUT}/feed.xml', 'w', encoding='utf-8') as index:
         index.write(xml)
+
+
+def image_add_lite(a, image, orint):
+        if orint == "horizontal":
+            with a.div(style="width: 512px;"):
+                a.img(src=f"media/large/{image}", alt=image, style="width: 512px", tabindex=0)
+        if orint == "vertical":
+            with a.div(style="width: 256px"):
+                a.img(src=f"media/large/{image}", alt=image, style="width: 256px;", tabindex=0)
+        if orint == "square":
+            with a.div(style="width: 512px; height: 512px"):
+                a.img(src=f"media/large/{image}", alt=image, style="width: 512px; height: 512px", tabindex=0)
+        with a.a('download', href=f"media/original/{image}", tabindex=-1):
+            a("download")
+
+def prepare_lite(images):  # sourcery skip: extract-method
+    a = Airium()
+    
+    print('Creating lite website...')
+    a('<!DOCTYPE html>')
+    with a.html(lang="en"):
+        with a.head():
+            a.meta(charset="utf-8")
+            a.meta(name="viewport", content="width=device-width")
+
+        with a.body():
+            with a.div():
+                with a.div(klass="header-lite"):
+                    a.h1(CONFIG['OPENGRAPH'].get('WEBSITE_TITLE'))
+                        
+            with a.images(style="display:table;width: 100%;height: 100%;"):
+                for image in images:
+                    if image == 'gitkeep':
+                        continue
+                    
+                    with Image.open(f'{OUTPUT}/media/large/{image}') as im:
+                        if im.width > im.height:
+                            image_add_lite(a, image, 'horizontal')
+                        elif im.width == im.height :
+                            image_add_lite(a, image, 'square')
+                        else:
+                            image_add_lite(a, image, 'vertical')
+
+    html = str(a)
+    with open(f'{OUTPUT}/lite.html', 'w', encoding='utf-8') as index:
+        index.write(html)        
 
 if __name__ == "__main__":
     prepare_images()

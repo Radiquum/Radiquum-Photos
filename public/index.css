@@ -54,10 +54,12 @@ span, a {
     display: flex;
     justify-content: space-around;
     align-items: baseline;
-    width: 144px;
 }
 .header-links > * {
     font-size: 48px !important;
+}
+.header-links > *:not(:last-child) {
+    margin-right: 12px;
 }
 
 .social {
