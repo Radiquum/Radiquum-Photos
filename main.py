@@ -6,7 +6,8 @@ from shutil import copy, copytree, make_archive
 from airium import Airium
 import json
 import datetime
-
+import os.path
+import json
 
 # Default config
 
@@ -53,6 +54,14 @@ OUTPUT = CONFIG.get('OUTPUT')
 
 # Image resizing
 
+def add_margin(pil_img, top, right, bottom, left, color):
+    width, height = pil_img.size
+    new_width = width + right + left
+    new_height = height + top + bottom
+    result = Image.new(pil_img.mode, (new_width, new_height), color)
+    result.paste(pil_img, (left, top))
+    return result
+
 def prepare_images():
     print('Finding images...')
     image_array = next(os.walk(INPUT))
@@ -80,19 +89,31 @@ def prepare_images():
         copy(f'{INPUT}/{image}', f'{OUTPUT}/media/original/{image}')
 
         with Image.open(f'{INPUT}/{image}') as im:
-            im = ImageOps.exif_transpose(im)
-            EXIF = im.getexif()
+            image_orig = ImageOps.exif_transpose(im)
+            EXIF = image_orig.getexif()
             
-            im.thumbnail(CONFIG.get('LARGE_SIZE'), Image.LANCZOS)
-            im.save(f'{OUTPUT}/media/large/{image}', exif=EXIF)
+            image_orig.thumbnail(CONFIG.get('LARGE_SIZE'), Image.LANCZOS)
+            image_orig.save(f'{OUTPUT}/media/large/{image}', exif=EXIF)
+            
             if CONFIG["WEB"].get("USE_CDN") != True:
-                im.thumbnail(CONFIG.get('SMALL_SIZE'), Image.LANCZOS)
-                im.save(f'{OUTPUT}/media/small/{image}', optimize=True, quality=100)
-                im.thumbnail([25, 25], Image.LANCZOS)
-                im.save(f'{OUTPUT}/media/small/25-{image}', optimize=True, quality=100)
+                image_orig.thumbnail(CONFIG.get('SMALL_SIZE'), Image.LANCZOS)
+                image_orig.save(f'{OUTPUT}/media/small/{image}', optimize=True, quality=100)
+                image_orig.thumbnail([25, 25], Image.LANCZOS)
+                image_orig.save(f'{OUTPUT}/media/small/25-{image}', optimize=True, quality=100)
+            image_orig.close()
             if CONFIG.get('LITE') == True:
+                json_file = os.path.splitext(image)[0] + '.json'
+                sizes = []
                 im.thumbnail(CONFIG.get('LITE_SIZE'), Image.LANCZOS)
-                im.save(f'{OUTPUT}/lite/{image}', optimize=True, quality=80)
+                im.save(f'{OUTPUT}/lite/{os.path.splitext(image)[0]}{im.width}x{im.height}{os.path.splitext(image)[1]}', optimize=True, quality=80)
+                sizes.append(im.size)
+                if im.width < 128:
+                    space = int((128 - im.width)/2)
+                    img = add_margin(im, 0, space, 0, space, 'black')
+                    img.save(f'{OUTPUT}/lite/{os.path.splitext(image)[0]}{img.width}x{img.height}{os.path.splitext(image)[1]}', optimize=True, quality=80)
+                    sizes.append(img.size)
+                with open(f'{OUTPUT}/lite/{json_file}', 'w', encoding='utf-8') as file:
+                    file.write(json.dumps(sizes))
     
     if CONFIG.get("ZIP") == True:
         print('Creating ZIP...')
@@ -200,7 +221,7 @@ def prepare_website(images):  # sourcery skip: extract-method
                         with a.a(href="feed.xml", klass="material-icons"):
                             a('rss_feed')
                     if CONFIG.get('LITE') == True:
-                        with a.a(href="lite", klass="material-icons"):
+                        with a.a(href="lite/", klass="material-icons"):
                             a('data_saver_on')
                         
         with a.div(klass="modal", id="modal"):
@@ -284,15 +305,28 @@ def prepare_rss(images):  # sourcery skip: extract-method
 
 
 def image_add_lite(a, image, orint):
+        json_file = os.path.splitext(image)[0] + '.json'
+        with open(f'{OUTPUT}/lite/{json_file}') as file:
+            sizes = json.load(file)
+
         if orint == "horizontal":
-            with a.div(style="width: 256px;"):
-                a.img(src=f"{image}", alt=image, style="width: 256px;", tabindex=0)
+            with a.div(style="width: 256px; margin-left: 4px"):
+                a.img(src=f"{os.path.splitext(image)[0]}{sizes[0][0]}x{sizes[0][1]}{os.path.splitext(image)[1]}", alt=image, style="width: 256px;")
+                for size in sizes:
+                    with a.a('download', href=f'{os.path.splitext(image)[0]}{size[0]}x{size[1]}{os.path.splitext(image)[1]}'):
+                        a(f"download {size[0]}x{size[1]}")
         if orint == "vertical":
-            with a.div(style="width: 128px"):
-                a.img(src=f"{image}", alt=image, style="width: 128px;", tabindex=0)
+            with a.div(style="width: 128px; margin-left: 4px"):
+                a.img(src=f"{os.path.splitext(image)[0]}{sizes[0][0]}x{sizes[0][1]}{os.path.splitext(image)[1]}", alt=image, style="width: 128px;")
+                for size in sizes:
+                    with a.a('download', href=f'{os.path.splitext(image)[0]}{size[0]}x{size[1]}{os.path.splitext(image)[1]}'):
+                        a(f"download {size[0]}x{size[1]}")
         if orint == "square":
-            with a.div(style="width: 256px; height: 256px"):
-                a.img(src=f"{image}", alt=image, style="width: 256px; height: 256px", tabindex=0)
+            with a.div(style="width: 256px; height: 256px; margin-left: 4px"):
+                a.img(src=f"{os.path.splitext(image)[0]}{sizes[0][0]}x{sizes[0][1]}{os.path.splitext(image)[1]}", alt=image, style="width: 256px; height: 256px")
+                for size in sizes:
+                    with a.a('download', href=f'{os.path.splitext(image)[0]}{size[0]}x{size[1]}{os.path.splitext(image)[1]}'):
+                        a(f"download {size[0]}x{size[1]}")
 
 def prepare_lite(images):  # sourcery skip: extract-method
     a = Airium()
