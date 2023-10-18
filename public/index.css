@@ -130,14 +130,14 @@ images {
     border-radius: 10px;
     cursor: pointer;
     object-fit: cover;
-    transition: scale 0.25s, transform 0.5s;
+    transition: scale 0.25s, transform 0.25s;
     width: 300px;
 }
 div.img:hover {
     z-index: 2;
 }
 div.img > img {
-    transition: border-radius 0.5s;
+    transition: border-radius 0.25s;
 }
 
 div{
@@ -150,17 +150,19 @@ div{
 
 .image-overlay{ 
     position: absolute;
-    opacity: 0;
+    opacity: 1;
     bottom: 0;
     right: 0;
     width: 100%;
     height: 64px;
     border-radius: 0 0 10px 10px;
-    transition: transform 0.5s, scale 0.5s, opacity 0.25s;
+    transition: transform 0.25s, scale 0.25s, opacity 0.25s;
     transform-origin: top;
     display: flex;
     justify-content: space-around;
     align-items: center;
+    z-index: -1;
+    padding-top: 12px;
 }
 
 .image-overlay-button {
@@ -288,10 +290,6 @@ div.img:hover {
     transform: translateY(-32px);
 }
 
-div.img:hover > img {
-    border-radius: 10px 10px 0 0;
-}
-
 .img:hover  > .image-overlay{
     transform: translateY(64px);
 }
@@ -300,7 +298,7 @@ div.img:hover > img {
     display: flex;
 }
 
-*.opacity, .modal-navigation > *:hover, div.img:hover > .image-overlay, .image-overlay-button > *:hover {
+*.opacity, .modal-navigation > *:hover, .image-overlay-button > *:hover {
     opacity: 1 !important;
 }
 
