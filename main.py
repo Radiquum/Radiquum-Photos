@@ -84,29 +84,28 @@ def prepare_images():
         
         if image in image_array_check[2] or image == 'gitkeep':
             continue
-        
+
         print('Processing {0:50} {1}/{2}'.format(image, count, len(image_array[2]) - len(image_array_check[2])))
         copy(f'{INPUT}/{image}', f'{OUTPUT}/media/original/{image}')
 
         with Image.open(f'{INPUT}/{image}') as im:
             image_orig = ImageOps.exif_transpose(im)
             EXIF = image_orig.getexif()
-            
+
             image_orig.thumbnail(CONFIG.get('LARGE_SIZE'), Image.LANCZOS)
             image_orig.save(f'{OUTPUT}/media/large/{image}', exif=EXIF)
-            
+
             if CONFIG["WEB"].get("USE_CDN") != True:
                 image_orig.thumbnail(CONFIG.get('SMALL_SIZE'), Image.LANCZOS)
                 image_orig.save(f'{OUTPUT}/media/small/{image}', optimize=True, quality=100)
                 image_orig.thumbnail([25, 25], Image.LANCZOS)
-                image_orig.save(f'{OUTPUT}/media/small/25-{image}', optimize=True, quality=100)
+                image_orig.save(f'{OUTPUT}/media/small/25-{image}', optimize=True, quality=80)
             image_orig.close()
             if CONFIG.get('LITE') == True:
-                json_file = os.path.splitext(image)[0] + '.json'
-                sizes = []
+                json_file = f'{os.path.splitext(image)[0]}.json'
                 im.thumbnail(CONFIG.get('LITE_SIZE'), Image.LANCZOS)
                 im.save(f'{OUTPUT}/lite/{os.path.splitext(image)[0]}{im.width}x{im.height}{os.path.splitext(image)[1]}', optimize=True, quality=80)
-                sizes.append(im.size)
+                sizes = [im.size]
                 if im.width < 128:
                     space = int((128 - im.width)/2)
                     img = add_margin(im, 0, space, 0, space, 'black')
@@ -114,17 +113,19 @@ def prepare_images():
                     sizes.append(img.size)
                 with open(f'{OUTPUT}/lite/{json_file}', 'w', encoding='utf-8') as file:
                     file.write(json.dumps(sizes))
-    
+
     if CONFIG.get("ZIP") == True:
         print('Creating ZIP...')
         make_archive(f'{OUTPUT}/public/{datetime.datetime.now():%Y-%m-%d}', 'zip', INPUT)
-    
+
     prepare_website(sorted(image_array[2], reverse=True))
     return True
 
 # Website generation
 
 def image_add(a, image, orint):
+    width, height = Image.open(f'{OUTPUT}/media/original/{image}').size
+    
     if CONFIG["WEB"].get("USE_CDN") == True:
         with a.div(klass=f"img {orint} blur-img", style=f'background-image: url(//wsrv.nl/?url={CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/large/{image}&w=25&h=25)'):
             a.img(klass="img clickable",\
@@ -135,18 +136,30 @@ def image_add(a, image, orint):
                     src=f'//wsrv.nl/?url={CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/large/{image}&w=475&h=475', loading="lazy", alt=image, tabindex=0)
             
             with a.div(klass="image-overlay", id="image-overlay"):
-                with a.span(id="copy-overlay", klass="material-icons", url=f'media/original/{image}', tabindex=-1):
-                    a('share')
-                with a.a('download', id="download-overlay", klass="material-icons", href=f"media/original/{image}", tabindex=-1):
-                    a("download")
+                with a.div(klass="image-overlay-info"):
+                    with a.p():
+                        a(f'{image}')
+                    with a.p():
+                        a(f'{width} x {height}')
+                with a.div(klass="image-overlay-button"):
+                    with a.span(id="copy-overlay", klass="material-icons", url=f'media/original/{image}', tabindex=-1):
+                        a('share')
+                    with a.a('download', id="download-overlay", klass="material-icons", href=f"media/original/{image}", tabindex=-1):
+                        a("download")
     else:
         with a.div(klass=f"img {orint} blur-img", style=f'background-image: url(media/small/25-{image})'):
             a.img(klass="img clickable", src=f"media/small/{image}", alt=image, loading="lazy", tabindex=0)
             with a.div(klass="image-overlay", id="image-overlay"):
-                with a.span(id="copy-overlay", klass="material-icons", url=f'media/original/{image}', tabindex=-1):
-                    a('share')
-                with a.a('download', id="download-overlay", klass="material-icons", href=f"media/original/{image}", tabindex=-1):
-                    a("download")
+                with a.div(klass="image-overlay-info"):
+                    with a.p():
+                        a(f'{image}')
+                    with a.p():
+                        a(f'{width} x {height}')
+                with a.div(klass="image-overlay-button"):
+                    with a.span(id="copy-overlay", klass="material-icons", url=f'media/original/{image}', tabindex=-1):
+                        a('share')
+                    with a.a('download', id="download-overlay", klass="material-icons", href=f"media/original/{image}", tabindex=-1):
+                        a("download")
                             
 def prepare_website(images):  # sourcery skip: extract-method
     a = Airium()
@@ -305,28 +318,28 @@ def prepare_rss(images):  # sourcery skip: extract-method
 
 
 def image_add_lite(a, image, orint):
-        json_file = os.path.splitext(image)[0] + '.json'
-        with open(f'{OUTPUT}/lite/{json_file}') as file:
-            sizes = json.load(file)
+    json_file = f'{os.path.splitext(image)[0]}.json'
+    with open(f'{OUTPUT}/lite/{json_file}') as file:
+        sizes = json.load(file)
 
-        if orint == "horizontal":
-            with a.div(style="width: 256px; margin-left: 4px"):
-                a.img(src=f"{os.path.splitext(image)[0]}{sizes[0][0]}x{sizes[0][1]}{os.path.splitext(image)[1]}", alt=image, style="width: 256px;")
-                for size in sizes:
-                    with a.a('download', href=f'{os.path.splitext(image)[0]}{size[0]}x{size[1]}{os.path.splitext(image)[1]}'):
-                        a(f"download {size[0]}x{size[1]}")
-        if orint == "vertical":
-            with a.div(style="width: 128px; margin-left: 4px"):
-                a.img(src=f"{os.path.splitext(image)[0]}{sizes[0][0]}x{sizes[0][1]}{os.path.splitext(image)[1]}", alt=image, style="width: 128px;")
-                for size in sizes:
-                    with a.a('download', href=f'{os.path.splitext(image)[0]}{size[0]}x{size[1]}{os.path.splitext(image)[1]}'):
-                        a(f"download {size[0]}x{size[1]}")
-        if orint == "square":
-            with a.div(style="width: 256px; height: 256px; margin-left: 4px"):
-                a.img(src=f"{os.path.splitext(image)[0]}{sizes[0][0]}x{sizes[0][1]}{os.path.splitext(image)[1]}", alt=image, style="width: 256px; height: 256px")
-                for size in sizes:
-                    with a.a('download', href=f'{os.path.splitext(image)[0]}{size[0]}x{size[1]}{os.path.splitext(image)[1]}'):
-                        a(f"download {size[0]}x{size[1]}")
+    if orint == "horizontal":
+        with a.div(style="width: 256px; margin-left: 4px"):
+            a.img(src=f"{os.path.splitext(image)[0]}{sizes[0][0]}x{sizes[0][1]}{os.path.splitext(image)[1]}", alt=image, style="width: 256px;")
+            for size in sizes:
+                with a.a('download', href=f'{os.path.splitext(image)[0]}{size[0]}x{size[1]}{os.path.splitext(image)[1]}'):
+                    a(f"download {size[0]}x{size[1]}")
+    if orint == "vertical":
+        with a.div(style="width: 128px; margin-left: 4px"):
+            a.img(src=f"{os.path.splitext(image)[0]}{sizes[0][0]}x{sizes[0][1]}{os.path.splitext(image)[1]}", alt=image, style="width: 128px;")
+            for size in sizes:
+                with a.a('download', href=f'{os.path.splitext(image)[0]}{size[0]}x{size[1]}{os.path.splitext(image)[1]}'):
+                    a(f"download {size[0]}x{size[1]}")
+    if orint == "square":
+        with a.div(style="width: 256px; height: 256px; margin-left: 4px"):
+            a.img(src=f"{os.path.splitext(image)[0]}{sizes[0][0]}x{sizes[0][1]}{os.path.splitext(image)[1]}", alt=image, style="width: 256px; height: 256px")
+            for size in sizes:
+                with a.a('download', href=f'{os.path.splitext(image)[0]}{size[0]}x{size[1]}{os.path.splitext(image)[1]}'):
+                    a(f"download {size[0]}x{size[1]}")
 
 def prepare_lite(images):  # sourcery skip: extract-method
     a = Airium()

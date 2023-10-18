@@ -9,28 +9,57 @@
 
 /* Body styles */
 
+:root {
+    --background-color: #0b132b;
+    --main-text-color: #fbaccd;
+}
+
 body {
     font-family: 'Kanit', sans-serif;
     font-weight: 300;
 }
 
 @media (prefers-color-scheme: dark) {
-    body, .image-overlay{
-      background-color: #0b132b;
-    }
-    .header, .header-links > *, .image-overlay > *, .modal-navigation > *{
-        color: #fbaccd;
-      }
+    
+    :root {
+        --background-color: #0b132b;
+        --overlay-background-color: #fbaccd;
+        --main-text-color: #fbaccd;
+        --overlay-text-color: #0b132b;
     }
 
-@media (prefers-color-scheme: light) {
-    body, .image-overlay{
-        background-color: rgba(240, 248, 255, 1);
+    body {
+      background-color: var(--background-color);
     }
-    .header, .header-links > *, .image-overlay > *, .modal-navigation > *{
-        color: #ff7b86;
+    .image-overlay, .image-overlay-info, .image-overlay-button > * {
+        background-color: var(--overlay-background-color);
+        color: var(--overlay-text-color);
     }
+    .header, .header-links > *, .modal-navigation > *{
+        color: var(--main-text-color);
+      }
 }
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --background-color: rgba(240, 248, 255, 1);
+        --overlay-background-color: #0b132b;
+        --main-text-color: #fbaccd;
+        --overlay-text-color: rgba(240, 248, 255, 1);
+    }
+
+    body {
+        background-color: var(--background-color);
+      }
+      .image-overlay, .image-overlay-info, .image-overlay-button > * {
+          background-color: var(--overlay-background-color);
+          color: var(--overlay-text-color);
+      }
+      .header, .header-links > *, .modal-navigation > *{
+          color: var(--main-text-color);
+        }
+}
+
 span, a {
     text-decoration: none;
     cursor: pointer;
@@ -47,6 +76,7 @@ span, a {
 .header-title {
     display: flex;
     align-items: baseline;
+    font-size: 2rem;
 }
 
 .header-links {
@@ -100,8 +130,14 @@ images {
     border-radius: 10px;
     cursor: pointer;
     object-fit: cover;
-    transition: scale 0.1s, border-radius 0.1s;
+    transition: scale 0.25s, transform 0.5s;
     width: 300px;
+}
+div.img:hover {
+    z-index: 2;
+}
+div.img > img {
+    transition: border-radius 0.5s;
 }
 
 div{
@@ -114,27 +150,29 @@ div{
 
 .image-overlay{ 
     position: absolute;
-    bottom: 0.5rem;
-    right: 0.5rem;
-    width: 120px;
-    height: 48px;
-    border-radius: 6px;
-    scale: 0;
-    transition: scale 0.2s, border-radius 0.1s;
-    transform-origin: bottom right;
+    opacity: 0;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 64px;
+    border-radius: 0 0 10px 10px;
+    transition: transform 0.5s, scale 0.5s, opacity 0.25s;
+    transform-origin: top;
     display: flex;
     justify-content: space-around;
     align-items: center;
 }
 
-.image-overlay:where(:hover, :focus) {
-    border-radius: 8px;
+.image-overlay-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
-
-.image-overlay > * {
+.image-overlay-button > * {
     opacity: 0.5;
     font-size: 32px !important;
+    transition: opacity 0.25s;
 }
 
 .blur-img, .blur-modal {
@@ -246,16 +284,24 @@ div{
     scale: 1.05;
 }
 
+div.img:hover {
+    transform: translateY(-32px);
+}
+
+div.img:hover > img {
+    border-radius: 10px 10px 0 0;
+}
+
 .img:hover  > .image-overlay{
-    scale: 1;
+    transform: translateY(64px);
 }
 
 .modal.flex, .copy-popup.flex{
     display: flex;
 }
 
-*.opacity, .modal-navigation > *:hover, .image-overlay > *:hover {
-    opacity: 1;
+*.opacity, .modal-navigation > *:hover, div.img:hover > .image-overlay, .image-overlay-button > *:hover {
+    opacity: 1 !important;
 }
 
 /* Copy popup */
@@ -295,6 +341,9 @@ div{
 }
 
 @media only screen and (max-width: 750px){
+    .header-title {
+        font-size: larger
+    }
     .header-links {
         margin-left: 0;
     }
@@ -314,7 +363,16 @@ div{
     .horizontal, .horizontal > img{
         min-height: 137px;
     }
+    .image-overlay {
+        height: 32px;
+    }
     .img:hover  > .image-overlay{
-        scale: .75;
+        transform: translateY(32px);
+    }
+    .image-overlay-button > * {
+        font-size: 16px !important;
+    }
+    .image-overlay-info > * {
+        font-size: 8px !important;
     }
 }
