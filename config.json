@@ -17,7 +17,7 @@
    "RSS": false,
    "LITE": false,
    "WEB": {
-      "TITLE": "<h1>Radiquum</h1><p>Photos</p>",
+      "TITLE": "<h1>Radiquum</h1><p>Photos</p> 🍎",
       "SOCIAL_IMG": "Bento-Logo.svg",
       "SOCIAL_URL": "https://bento.me/radiquum",
       "USE_CDN": true

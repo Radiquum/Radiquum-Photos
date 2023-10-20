@@ -138,8 +138,6 @@ def image_add(a, image, orint):
             with a.div(klass="image-overlay", id="image-overlay"):
                 with a.div(klass="image-overlay-info"):
                     with a.p():
-                        a(f'{image}')
-                    with a.p():
                         a(f'{width} x {height}')
                 with a.div(klass="image-overlay-button"):
                     with a.span(id="copy-overlay", klass="material-icons", url=f'media/original/{image}', tabindex=-1):
@@ -151,8 +149,6 @@ def image_add(a, image, orint):
             a.img(klass="img clickable", src=f"media/small/{image}", alt=image, loading="lazy", tabindex=0)
             with a.div(klass="image-overlay", id="image-overlay"):
                 with a.div(klass="image-overlay-info"):
-                    with a.p():
-                        a(f'{image}')
                     with a.p():
                         a(f'{width} x {height}')
                 with a.div(klass="image-overlay-button"):
