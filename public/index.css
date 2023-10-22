@@ -277,10 +277,13 @@ div.blur-img.loaded:hover > img {
 
 .modal-navigation {
     display: flex;
-    height: 64px;
-    align-items: center;
+    padding-block: 16px;
     gap: 1.5rem;
     transition: opacity 0.2s;
+    width: 100%;
+    justify-content: space-around;
+    overflow: hidden;
+    background-color: var(--background-color);
 }
 
 .modal-navigation > * {
@@ -330,7 +333,7 @@ div.img:hover {
     display: none;
     opacity: 0;
     transition: opacity 0.3s;
-    z-index: 2;
+    z-index: 5;
 }
 
 .copy-popup > * {
