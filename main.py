@@ -123,7 +123,7 @@ def prepare_images():
 
 # Website generation
 
-def image_add(a, image, orint):
+def image_add(a, image, orint, idx):
     width, height = Image.open(f'{OUTPUT}/media/original/{image}').size
     
     if CONFIG["WEB"].get("USE_CDN") == True:
@@ -133,7 +133,7 @@ def image_add(a, image, orint):
                     //wsrv.nl/?url={CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/large/{image}&w=300&h=300 300w, \
                     //wsrv.nl/?url={CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/large/{image}&w=475&h=475 475w',\
                     sizes="(max-width: 700px) 175px, (max-resolution: 1dppx) and (min-width: 1400px) 475px, 300px",\
-                    src=f'//wsrv.nl/?url={CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/large/{image}&w=475&h=475', loading="lazy", alt=image, tabindex=0)
+                    src=f'//wsrv.nl/?url={CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/large/{image}&w=475&h=475', loading="lazy", alt=image, tabindex=0, idx=idx)
             
             with a.div(klass="image-overlay", id="image-overlay"):
                 with a.div(klass="image-overlay-info"):
@@ -146,7 +146,7 @@ def image_add(a, image, orint):
                         a("download")
     else:
         with a.div(klass=f"img {orint} blur-img", style=f'background-image: url(media/small/25-{image})'):
-            a.img(klass="img clickable", src=f"media/small/{image}", alt=image, loading="lazy", tabindex=0)
+            a.img(klass="img clickable", src=f"media/small/{image}", alt=image, loading="lazy", tabindex=0, idx=idx)
             with a.div(klass="image-overlay", id="image-overlay"):
                 with a.div(klass="image-overlay-info"):
                     with a.p():
@@ -238,6 +238,8 @@ def prepare_website(images):  # sourcery skip: extract-method
                 a.img(klass="modal-image", id="modal-image", src="", alt="")
             a.div(klass="modal-background", id="modal-background")
             with a.div(klass="modal-navigation", id="modal-navigation"):
+                with a.span(id="prev", klass="material-icons"):
+                    a("arrow_back") 
                 with a.span(id="copy", klass="material-icons"):
                     a('share')
                 with a.a('download', id="download", klass="material-icons", href=""):
@@ -246,7 +248,9 @@ def prepare_website(images):  # sourcery skip: extract-method
                     a("info") 
                 with a.span(id="close", klass="material-icons"):
                     a("close") 
-                        
+                with a.span(id="next", klass="material-icons"):
+                    a("arrow_forward") 
+        idx = 0
         with a.images():
             for image in images:
                 if image == 'gitkeep':
@@ -254,11 +258,12 @@ def prepare_website(images):  # sourcery skip: extract-method
                 
                 with Image.open(f'{OUTPUT}/media/large/{image}') as im:
                     if im.width > im.height:
-                        image_add(a, image, 'horizontal')
+                        image_add(a, image, 'horizontal', idx)
                     elif im.width == im.height :
-                        image_add(a, image, 'square')
+                        image_add(a, image, 'square', idx)
                     else:
-                        image_add(a, image, 'vertical')
+                        image_add(a, image, 'vertical', idx)
+                idx += 1
                         
         with a.div(klass="copy-popup", id="copy-popup"):
             with a.span(klass="material-icons"):
