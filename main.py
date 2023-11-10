@@ -127,7 +127,7 @@ def image_add(a, image, orint, idx):
     width, height = Image.open(f'{OUTPUT}/media/original/{image}').size
     
     if CONFIG["WEB"].get("USE_CDN") == True:
-        with a.div(klass=f"img {orint} blur-img", style=f'background-image: url(//wsrv.nl/?url={CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/large/{image}&w=25&h=25)'):
+        with a.div(klass=f"img {orint} blur-img", style=f'background-image: url(//wsrv.nl/?url={CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/large/{image}&w=25&h=25);'):
             a.img(klass="img clickable",\
                 srcset=f'//wsrv.nl/?url={CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/large/{image}&w=175&h=175 175w, \
                     //wsrv.nl/?url={CONFIG["OPENGRAPH"].get("WEBSITE_URL")}/media/large/{image}&w=300&h=300 300w, \
@@ -145,7 +145,7 @@ def image_add(a, image, orint, idx):
                     with a.a('download', id="download-overlay", klass="material-icons", href=f"media/original/{image}", tabindex=-1):
                         a("download")
     else:
-        with a.div(klass=f"img {orint} blur-img", style=f'background-image: url(media/small/25-{image})'):
+        with a.div(klass=f"img {orint} blur-img", style=f'background-image: url(media/small/25-{image});'):
             a.img(klass="img clickable", src=f"media/small/{image}", alt=image, loading="lazy", tabindex=0, idx=idx)
             with a.div(klass="image-overlay", id="image-overlay"):
                 with a.div(klass="image-overlay-info"):
