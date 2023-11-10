@@ -145,7 +145,7 @@ def image_add(a, image, orint, idx):
                     with a.a('download', id="download-overlay", klass="material-icons", href=f"media/original/{image}", tabindex=-1):
                         a("download")
     else:
-        with a.div(klass=f"img {orint} blur-img", style=f'background-image: url(media/small/25-{image})'):
+        with a.div(klass=f"img {orint} blur-img", style=f'background-image: url(media/small/25-{image});'):
             a.img(klass="img clickable", src=f"media/small/{image}", alt=image, loading="lazy", tabindex=0, idx=idx)
             with a.div(klass="image-overlay", id="image-overlay"):
                 with a.div(klass="image-overlay-info"):
